@@ -24,9 +24,7 @@ public class CategoryDAOImpl implements CategoryDAO {
         if (uuid == null) {
             return null;
         }
-        // تخصيص 16 بايت لتخزين UUID
         ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-        // تخزين الأجزاء الأكثر والأقل أهمية للـ UUID (Most Significant Bits & Least Significant Bits)
         bb.putLong(uuid.getMostSignificantBits());
         bb.putLong(uuid.getLeastSignificantBits());
         return bb.array();
@@ -59,7 +57,7 @@ public class CategoryDAOImpl implements CategoryDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(INSERT_CATEGORY_SQL)) {
             byte[] idBytes = uuidToBytes(category.getCategoryId());
-            stmt.setBytes(1, idBytes); // استخدام setBytes()
+            stmt.setBytes(1, idBytes);
             stmt.setString(2, category.getName());
             int affectedRows = stmt.executeUpdate();
 
