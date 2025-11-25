@@ -14,9 +14,9 @@ import java.util.UUID;
 
 public class UserDAOImpl implements UserDAO {
 
-    private static final String INSERT_USER_SQL = "INSERT INTO Users (user_id, username, password_hash, role) VALUES (?, ?, ?, ?);";
+    private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password_hash, role) VALUES (?, ?, ?, ?);";
     private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password_hash, role FROM Users WHERE username = ? ";
-    private static final String UPDATE_USER_SQL = "UPDATE Users SET password_hash =? , role ? WHERE user_id = ?";
+    private static final String UPDATE_USER_SQL = "UPDATE users SET password_hash =? , role ? WHERE user_id = ?";
 
     //this will convert a uuid object(128 bits) to 16byte for efficency
     //return type : byte[]
@@ -143,7 +143,7 @@ public class UserDAOImpl implements UserDAO {
             int rowsAffected = ps.executeUpdate();
             //if we get 1 that means the update was succseful
             if(rowsAffected !=1){
-                System.err.println("Waring update operation affected : "+rowsAffected + "the row for userid :"+ user.getUserID());
+                System.err.println("Warning update operation affected : "+rowsAffected + "the row for userid :"+ user.getUserID());
             }
 
         }catch(SQLException e) {
