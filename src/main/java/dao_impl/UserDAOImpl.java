@@ -130,7 +130,7 @@ public class UserDAOImpl implements UserDAO {
 
 
     @Override
-    public void update(User user){
+    public void update(User user) throws SQLException{
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(UPDATE_USER_SQL)){
             //we got the service layer to update these fields
@@ -151,6 +151,7 @@ public class UserDAOImpl implements UserDAO {
             System.err.println("Error updating user ID"+ user.getUserID());
             System.err.println("SQL State "+ e.getSQLState() +"Error code:"+ e.getErrorCode());
             e.printStackTrace();
+            throw e;
         }
         }
 
