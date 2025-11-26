@@ -14,8 +14,8 @@ import java.util.UUID;
 
 public class UserDAOImpl implements UserDAO {
 
-    private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password, role) VALUES (?, ?, ?, ?);";
-    private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password, role FROM Users WHERE username = ? ";
+    private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password, role) VALUES (?, ?, ?, ?)";
+    private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password, role FROM users WHERE username = ?";
     private static final String UPDATE_USER_SQL = "UPDATE users SET password =? , role ? WHERE user_id = ?";
 
     //this will convert a uuid object(128 bits) to 16byte for efficency
