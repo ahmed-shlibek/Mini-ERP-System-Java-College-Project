@@ -1,9 +1,9 @@
 package main.java.dao;
 import main.java.model.User;
 
-import java.util.*;
-import java.util.UUID;
+
 import java.sql.SQLException;
+import java.util.Optional;
 
 
 public interface UserDAO {

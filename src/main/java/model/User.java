@@ -1,25 +1,24 @@
 package main.java.model;
-import java.util.UUID;
-import java.util.Objects;
 
+import java.util.UUID;
 
 public class User {
     private UUID userId;
     private String username;
-    private String passwordHash;
+    private String password;
     private String role;
 
 
     public User() {
     }
 
-    public User(String username, String passwordHash, String role) {
+    public User(String username, String password, String role) {
 
         //this gives ur a random id each time there is a user
         this.userId = UUID.randomUUID();
         //
         this.username = username;
-        this.passwordHash = passwordHash;
+        this.password = password;
         this.role = role;
     }
 
@@ -32,8 +31,8 @@ public class User {
         return username;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getPassword() {
+        return password;
     }
 
     public String getRole() {
@@ -49,8 +48,8 @@ public class User {
         this.username = username;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setRole(String role) {

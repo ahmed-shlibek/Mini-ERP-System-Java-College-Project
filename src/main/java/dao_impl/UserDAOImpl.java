@@ -14,9 +14,9 @@ import java.util.UUID;
 
 public class UserDAOImpl implements UserDAO {
 
-    private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password_hash, role) VALUES (?, ?, ?, ?);";
-    private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password_hash, role FROM Users WHERE username = ? ";
-    private static final String UPDATE_USER_SQL = "UPDATE users SET password_hash =? , role ? WHERE user_id = ?";
+    private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password, role) VALUES (?, ?, ?, ?);";
+    private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password, role FROM Users WHERE username = ? ";
+    private static final String UPDATE_USER_SQL = "UPDATE users SET password =? , role ? WHERE user_id = ?";
 
     //this will convert a uuid object(128 bits) to 16byte for efficency
     //return type : byte[]
@@ -58,13 +58,13 @@ public class UserDAOImpl implements UserDAO {
         //retrieve the rest
          String username = rs.getString("username");
          String role = rs.getString("role");
-         String passwordHash = rs.getString("password");
+         String password = rs.getString("password");
 
          //we are populating so basically filling in
          User user = new User();
          user.setUserID(userId);
          user.setRole(role);
-         user.setPasswordHash(passwordHash);
+         user.setPassword(password);
          user.setUsername(username);
 
          return user;
@@ -83,7 +83,7 @@ public class UserDAOImpl implements UserDAO {
             //ps.setstring sends the value with a place holder to our database
         ps.setBytes(1,userIdBytes);
         ps.setString(2,user.getUsername());
-        ps.setString(3,user.getPasswordHash());
+        ps.setString(3,user.getPassword());
         ps.setString(4,user.getRole());
 
         //basically tells it to update our sql
@@ -134,7 +134,7 @@ public class UserDAOImpl implements UserDAO {
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(UPDATE_USER_SQL)){
             //we got the service layer to update these fields
-            ps.setString(1, user.getPasswordHash());
+            ps.setString(1, user.getPassword());
             ps.setString(2,user.getRole());
             ps.setBytes(3,uuidToBytes(user.getUserID()));
 
