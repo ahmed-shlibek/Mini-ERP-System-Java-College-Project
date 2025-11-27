@@ -55,8 +55,13 @@ public class Product {
         this.categoryId = categoryId;
     }
 
-    public void setPrice(long price){
-        this.price = price;
+    public void setPrice(long newprice){
+        //just to ensure that the price is positive
+        if(newprice > 0){
+        this.price = newprice;
+        }else{
+            System.err.println("Error: Price has to be positive");
+        }
     }
 
     public void setQuantity(int quantity){
