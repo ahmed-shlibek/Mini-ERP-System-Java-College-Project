@@ -16,7 +16,6 @@ public class User {
 
         //this gives ur a random id each time there is a user
         this.userId = UUID.randomUUID();
-        //
         this.username = username;
         this.password = password;
         this.role = role;

@@ -18,7 +18,7 @@ public interface ProductDAO {
     //deleted a product
     void delete(UUID productId)throws SQLException;
 
-    //looks for product in the database by its name
+    //looks for product in the database by its id
     Optional<Product> findByProductId(UUID productId)throws SQLException;
 
     //looks for the product in the database by its name
