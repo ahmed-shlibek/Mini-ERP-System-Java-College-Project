@@ -170,10 +170,10 @@ public class OrderDAOImpl implements OrderDAO {
 
             stmt.setString(1, order.getStatus());
             stmt.setBytes(2, uuidToBytes(order.getOrderId()));
-            int rowsaffected = stmt.executeUpdate();
+            int affectedRows = stmt.executeUpdate();
 
-            if(rowsaffected == 0){
-                System.err.println("Warning rows affected :"+ rowsaffected + "the order id:"+order.getOrderId());
+            if(affectedRows == 0){
+                System.err.println("Warning rows affected :"+ affectedRows + "the order id:"+order.getOrderId());
             }
 
         } catch (SQLException e) {

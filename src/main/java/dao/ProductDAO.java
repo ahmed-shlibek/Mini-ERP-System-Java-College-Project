@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface ProductDAO {
 
     //function to insert new product
-    void insert(Product product)throws SQLException;
+    void save(Product product)throws SQLException;
 
     //function to update Product
     void update(Product product)throws SQLException;

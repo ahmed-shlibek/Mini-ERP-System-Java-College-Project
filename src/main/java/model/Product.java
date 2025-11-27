@@ -7,13 +7,13 @@ public class Product {
     private UUID productId;
     private String name;
     private UUID categoryId;
-    private  double price;
+    private  long price;
     private int quantity;
 
     public Product(){
 
     }
-    public Product(String name , UUID category , double price, int quantity){
+    public Product(String name , UUID category , long price, int quantity){
 
         this.productId = UUID.randomUUID();
         this.name = name;
@@ -34,7 +34,7 @@ public class Product {
         return categoryId;
     }
 
-    public double getPrice(){
+    public long getPrice(){
         return price;
     }
 
@@ -55,7 +55,7 @@ public class Product {
         this.categoryId = categoryId;
     }
 
-    public void setPrice(double price){
+    public void setPrice(long price){
         this.price = price;
     }
 

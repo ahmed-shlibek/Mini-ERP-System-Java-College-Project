@@ -63,7 +63,7 @@ public class ProductDAOImpl implements ProductDAO {
         UUID categoryId = byteToUUID(cidBytes);
 
         String name = rs.getString("name");
-        double price = rs.getDouble("price");
+        long price = rs.getLong("price");
         int quantity = rs.getInt("quantity");
 
         Product product = new Product();
@@ -77,7 +77,7 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public void insert(Product product)throws SQLException{
+    public void save(Product product)throws SQLException{
         if(product.getProductId() == null){
             product.setProductId(UUID.randomUUID());
         }
@@ -90,7 +90,7 @@ public class ProductDAOImpl implements ProductDAO {
             ps.setBytes(1,productIdBytes);
             ps.setString(2,product.getName());
             ps.setBytes(3,categoryIdBytes);
-            ps.setDouble(4,product.getPrice());
+            ps.setLong(4,product.getPrice());
             ps.setInt(5,product.getQuantity());
 
             ps.executeUpdate();
@@ -135,10 +135,10 @@ public class ProductDAOImpl implements ProductDAO {
         PreparedStatement ps = conn.prepareStatement(DELETE_PRODUCT_SQL)){
 
             ps.setBytes(1,uuidToByte(productId));
-            int affectedrow = ps.executeUpdate();
+            int affectedRows = ps.executeUpdate();
 
-            if(affectedrow != 1){
-                System.err.println("Warning affected row :"+ affectedrow + " The Product id:"+ productId);
+            if(affectedRows != 1){
+                System.err.println("Warning affected row :"+ affectedRows + " The Product id:"+ productId);
 
             }
         }catch(SQLException e){

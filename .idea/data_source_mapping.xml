@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="mock:///OrderDAOImpl.java" value="aadd3576-c4fb-4719-8b4e-1270f6cf5a73" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/aadd3576-c4fb-4719-8b4e-1270f6cf5a73/console.sql" value="aadd3576-c4fb-4719-8b4e-1270f6cf5a73" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/aadd3576-c4fb-4719-8b4e-1270f6cf5a73/console_1.sql" value="aadd3576-c4fb-4719-8b4e-1270f6cf5a73" />
   </component>
