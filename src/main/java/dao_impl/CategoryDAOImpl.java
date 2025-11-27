@@ -74,7 +74,7 @@ public class CategoryDAOImpl implements CategoryDAO {
     public Optional<Category> findById(UUID uuid) {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(SELECT_BY_ID_SQL)) {
-            stmt.setObject(1, uuid);
+            stmt.setBytes(1, uuidToBytes(uuid));
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     Category category = mapResultSetToCategory(rs);
@@ -127,7 +127,7 @@ public class CategoryDAOImpl implements CategoryDAO {
     public void delete(UUID uuid) {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(DELETE_SQL)) {
-            stmt.setObject(1, uuid);
+            stmt.setBytes(1, uuidToBytes(uuid));
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
                 System.out.println("Category with ID " + uuid + " deleted successfully.");

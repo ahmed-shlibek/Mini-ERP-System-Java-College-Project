@@ -116,7 +116,7 @@ public class ProductDAOImpl implements ProductDAO {
 
             int rowsaffected = ps.executeUpdate();
 
-            if(rowsaffected !=1){
+            if(rowsaffected == 0){
                 System.err.println("Warning rows affected :"+ rowsaffected + "the product id:"+product.getProductId());
             }
         }catch(SQLException e){

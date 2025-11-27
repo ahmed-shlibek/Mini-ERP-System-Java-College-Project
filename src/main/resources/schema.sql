@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS orders (
     order_id BINARY(16) primary key,
     user_id BINARY(16) NOT NULL,
+    status VARCHAR(25) NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user
         FOREIGN KEY (user_id)
