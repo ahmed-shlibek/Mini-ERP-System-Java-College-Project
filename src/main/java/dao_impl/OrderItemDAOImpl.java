@@ -76,6 +76,7 @@ public class OrderItemDAOImpl implements OrderItemDAO {
 
             int[] updateCounts = stmt.executeBatch();
 
+            //con commit is used to basicaly save the new changes after the latest changes
             conn.commit();
         } catch (SQLException e) {
             System.err.println("Database error during batch insert of Order Items: " + e.getMessage());

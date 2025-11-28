@@ -4,6 +4,7 @@ import main.java.model.User;
 
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.UUID;
 
 
 public interface UserDAO {
@@ -17,6 +18,9 @@ public interface UserDAO {
 
     //this will update the user in the database
     void update(User user) throws SQLException;
+
+    //this will delete user by user id
+    void delete(UUID userId)throws SQLException;
 
 
 }

@@ -17,6 +17,7 @@ public class UserDAOImpl implements UserDAO {
     private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password, role) VALUES (?, ?, ?, ?)";
     private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password, role FROM users WHERE username = ?";
     private static final String UPDATE_USER_SQL = "UPDATE users SET password =? , role = ? WHERE user_id = ?";
+    private static final String DELETE_BY_USER_ID_SQL ="DELETE FROM users WHERE user_id =?";
 
     //this will convert a uuid object(128 bits) to 16byte for efficency
     //return type : byte[]
@@ -155,6 +156,28 @@ public class UserDAOImpl implements UserDAO {
         }
         }
 
+    @Override
+    public void delete(UUID userId)throws SQLException{
+
+        try(Connection conn = DBConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement(DELETE_BY_USER_ID_SQL)){
+
+            ps.setBytes(1,uuidToBytes(userId));
+
+            int affectedRow = ps.executeUpdate();
+
+            if(affectedRow !=1){
+                System.err.println("Warning affected row"+ affectedRow + "The User ID:"+ userId);
+            }
+
+        }catch(SQLException e){
+
+            System.err.println("Error deleting user "+ userId);
+            System.err.println("SQL State:"+e.getSQLState() + "Error Code:"+ e.getErrorCode());
+            e.printStackTrace();
+            throw e;
+        }
+    }
     }
 
 
