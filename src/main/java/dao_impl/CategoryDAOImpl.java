@@ -50,7 +50,7 @@ public class CategoryDAOImpl implements CategoryDAO {
     }
 
     @Override
-    public Category save(Category category) {
+    public Category save(Category category) throws SQLException {
         if (category.getCategoryId() == null) {
             category.setCategoryId(UUID.randomUUID());
         }
@@ -64,14 +64,13 @@ public class CategoryDAOImpl implements CategoryDAO {
             if (affectedRows == 0) {
                 throw new SQLException("Creating category failed, no rows affected.");
             }
-        } catch (SQLException e) {
-            System.err.println("Database error while saving category: " + e.getMessage());
         }
+
         return category;
     }
 
     @Override
-    public Optional<Category> findById(UUID uuid) {
+    public Optional<Category> findById(UUID uuid) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(SELECT_BY_ID_SQL)) {
             stmt.setBytes(1, uuidToBytes(uuid));
@@ -82,15 +81,11 @@ public class CategoryDAOImpl implements CategoryDAO {
                 }
                 return Optional.empty();
             }
-        } catch (SQLException e) {
-            System.err.println("Database error while finding category by ID: " + e.getMessage());
         }
-
-        return Optional.empty();
     }
 
     @Override
-    public Optional<Category> findByName(String name) {
+    public Optional<Category> findByName(String name) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(SELECT_BY_NAME_SQL)) {
             stmt.setString(1, name);
@@ -101,14 +96,11 @@ public class CategoryDAOImpl implements CategoryDAO {
                 }
                 return Optional.empty();
             }
-        } catch (SQLException e) {
-            System.err.println("Database error while finding category by name: " + e.getMessage());
         }
-        return Optional.empty();
     }
 
     @Override
-    public List<Category> findAll() {
+    public List<Category> findAll()  throws SQLException {
         List<Category> categories = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(SELECT_ALL_SQL);
@@ -117,29 +109,18 @@ public class CategoryDAOImpl implements CategoryDAO {
                 Category category = mapResultSetToCategory(rs);
                 categories.add(category);
             }
-        } catch (SQLException e) {
-            System.err.println("Database error while finding all categories: " + e.getMessage());
         }
+
         return categories;
     }
 
     @Override
-    public void delete(UUID uuid) {
+    public boolean delete(UUID uuid) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(DELETE_SQL)) {
             stmt.setBytes(1, uuidToBytes(uuid));
             int affectedRows = stmt.executeUpdate();
-            if (affectedRows > 0) {
-                System.out.println("Category with ID " + uuid + " deleted successfully.");
-            } else {
-                System.out.println("Category with ID " + uuid + " not found or already deleted.");
-            }
-        } catch (SQLException e) {
-            if (e.getSQLState().startsWith("23")) {
-                System.err.println("Database Error: Cannot delete category. Products are still linked to it.");
-            } else {
-                System.err.println("Database error while deleting category: " + e.getMessage());
-            }
+            return affectedRows > 0;
         }
     }
 }

@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS users (
     user_id BINARY(16) primary key,
     username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) not null,
-    role VARCHAR(25) not null,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(25) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -3,6 +3,7 @@ package main.java.service;
 import main.java.dao.CategoryDAO;
 import main.java.model.Category;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,19 +20,23 @@ public class CategoryService {
             throw new IllegalArgumentException("Category cannot be null");
         }
 
-        if (category.getName() == null || category.getName().isEmpty()) {
-            throw new IllegalArgumentException("Category name cannot be null");
+        if (category.getName() == null || category.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Category name cannot be null or empty");
         }
 
-        String normalizedString = category.getName().toLowerCase();
+        String normalizedString = category.getName().trim().toLowerCase();
 
-        if (categoryDAO.findByName(normalizedString).isPresent()) {
-            throw new IllegalArgumentException("Category with name " + category.getName() + " already exists");
+        try {
+
+            if (categoryDAO.findByName(normalizedString).isPresent()) {
+                throw new IllegalArgumentException("Category with name " + category.getName() + " already exists");
+            }
+
+            category.setName(normalizedString);
+            return categoryDAO.save(category);
+        } catch (SQLException e) {
+            throw new RuntimeException("Database operation failed during category creation.", e);
         }
-
-        category.setName(normalizedString);
-
-        return categoryDAO.save(category);
     }
 
     public static Optional<Category> getCategoryById(UUID uuid) {
@@ -39,7 +44,11 @@ public class CategoryService {
             throw new IllegalArgumentException("Category uuid cannot be null");
         }
 
-        return categoryDAO.findById(uuid);
+        try {
+            return categoryDAO.findById(uuid);
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error occurred while fetching category with ID: " + uuid, e);
+        }
     }
 
     public Optional<Category> getCategoryByName(String name) {
@@ -47,11 +56,19 @@ public class CategoryService {
             throw new IllegalArgumentException("Category name cannot be null");
         }
 
-        return categoryDAO.findByName(name);
+        try {
+            return categoryDAO.findByName(name);
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error occurred while fetching category with name: " + name, e);
+        }
     }
 
     public List<Category> getAllCategories() {
-        return categoryDAO.findAll();
+        try {
+            return categoryDAO.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error occurred while fetching categories", e);
+        }
     }
 
     public void deleteCategory(UUID uuid) {
@@ -59,6 +76,10 @@ public class CategoryService {
             throw new IllegalArgumentException("Category uuid cannot be null");
         }
 
-        categoryDAO.delete(uuid);
+        try {
+            categoryDAO.delete(uuid);
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error occurred while deleting category with ID: " + uuid, e);
+        }
     }
 }

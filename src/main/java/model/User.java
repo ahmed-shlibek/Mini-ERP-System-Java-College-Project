@@ -12,17 +12,23 @@ public class User {
     public User() {
     }
 
+    // The Service Layer uses this to create a user. The userId is expected to be generated automatically by the database upon insertion.
     public User(String username, String password, String role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
 
-        //this gives ur a random id each time there is a user
-        this.userId = UUID.randomUUID();
+    // The DAO Layer uses this when reading a record from the database, as the record already includes the unique identifier (UUID).
+    public User(UUID uuid, String username, String password, String role) {
+        this.userId = uuid;
         this.username = username;
         this.password = password;
         this.role = role;
     }
 
     // the getters
-    public UUID getUserID() {
+    public UUID getUserId() {
         return userId;
     }
 

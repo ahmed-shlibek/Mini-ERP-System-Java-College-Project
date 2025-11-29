@@ -3,7 +3,6 @@ package main.java.dao_impl;
 import main.java.dao.UserDAO;
 import main.java.database.DBConnection;
 import main.java.model.User;
-
 import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +15,7 @@ public class UserDAOImpl implements UserDAO {
 
     private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password, role) VALUES (?, ?, ?, ?)";
     private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password, role FROM users WHERE username = ?";
+    private static final String FIND_BY_ID_SQL = "SELECT user_id, username, password, role FROM users WHERE user_id = ?";
     private static final String UPDATE_USER_SQL = "UPDATE users SET password =? , role = ? WHERE user_id = ?";
     private static final String DELETE_BY_USER_ID_SQL ="DELETE FROM users WHERE user_id =?";
 
@@ -72,16 +72,17 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public void insert(User user)throws SQLException{
-        if(user.getUserID()== null){
+    public User save(User user) throws SQLException{
+        if(user.getUserId()== null){
             user.setUserID(UUID.randomUUID());
         }
         try(Connection conn = DBConnection.getConnection();
-        PreparedStatement ps = conn.prepareStatement(INSERT_USER_SQL)){
+            PreparedStatement ps = conn.prepareStatement(INSERT_USER_SQL)) {
 
-        byte[] userIdBytes = uuidToBytes(user.getUserID());
-        //the numbers are place holders for the ? in sql query
-            //ps.setstring sends the value with a place holder to our database
+        byte[] userIdBytes = uuidToBytes(user.getUserId());
+
+        //the numbers are placeholders for the ? in sql query
+        //ps.setString sends the value with a placeholder to our database
         ps.setBytes(1,userIdBytes);
         ps.setString(2,user.getUsername());
         ps.setString(3,user.getPassword());
@@ -89,72 +90,69 @@ public class UserDAOImpl implements UserDAO {
 
         //basically tells it to update our sql
         ps.executeUpdate();
-
-        }catch(SQLException e){
-
-            //looks for username only cuz its easier to find for the dev
-            System.err.println("Error inserting User :" + user.getUsername());
-            //this describes the nature of the error
-            System.err.println("SQL State: "+ e.getSQLState() + "Error Code:"+ e.getErrorCode());
-            e.printStackTrace();//prints the stack trace for easy debugging
-
-            //throws exception to service layer
-            throw e;
         }
+
+        return user;
     }
 
 
     @Override
-    public Optional<User> findByUsername(String username) throws SQLException {
+    public Optional<User> findByUserName(String username) throws SQLException {
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(FIND_BY_USERNAME_SQL)) {
             ps.setString(1, username);
 
             //ps.executequerry is a read operation
-            try(ResultSet rs = ps.executeQuery()){
+            try (ResultSet rs = ps.executeQuery()) {
                 //made result set querry then we see if anything returned if yes make the data row into a java object
-                if(rs.next()){
+                if (rs.next()) {
                     User user = mapResultSetToUser(rs);
                     //return it
                     return Optional.of(user);
                 }
                 //returned empty if did not work
-            }return Optional.empty();
-
-        } catch (SQLException e) {
-            System.err.println("Data Base error while looking for username " + e.getMessage());
+            }
+            return Optional.empty();
         }
-        // we return this because so we can say the database querry ran succesfully but no matching username was found
-        return Optional.empty();
     }
 
+    public Optional<User> findUserById(UUID id) throws SQLException {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_BY_ID_SQL)) {
+            stmt.setBytes(1, uuidToBytes(id));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    User user = mapResultSetToUser(rs);
+                    return Optional.of(user);
+                }
+                return Optional.empty();
+            }
+        }
+    }
 
     @Override
-    public void update(User user) throws SQLException{
+    public User update(User user) throws SQLException{
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(UPDATE_USER_SQL)){
             //we got the service layer to update these fields
             ps.setString(1, user.getPassword());
             ps.setString(2,user.getRole());
-            ps.setBytes(3,uuidToBytes(user.getUserID()));
+            ps.setBytes(3,uuidToBytes(user.getUserId()));
 
             //when we executed the update we got the whole ps to go the the sql to be executed
             //we called it and then it reutrns a number if 1 that means all goof if anything else then error
             int rowsAffected = ps.executeUpdate();
             //if we get 1 that means the update was succseful
             if(rowsAffected !=1){
-                System.err.println("Warning update operation affected : "+rowsAffected + "the row for userid :"+ user.getUserID());
+                System.err.println("Warning update operation affected : "+rowsAffected + "the row for userid :"+ user.getUserId());
             }
 
-        }catch(SQLException e) {
+        }
 
-            System.err.println("Error updating user ID"+ user.getUserID());
-            System.err.println("SQL State "+ e.getSQLState() +"Error code:"+ e.getErrorCode());
-            e.printStackTrace();
-            throw e;
-        }
-        }
+        return user;
+    }
 
     @Override
     public void delete(UUID userId)throws SQLException{
