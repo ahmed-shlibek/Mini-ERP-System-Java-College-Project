@@ -16,5 +16,5 @@ public interface CategoryDAO {
 
     List<Category> findAll() throws SQLException;
 
-    boolean delete(UUID uuid) throws SQLException;
+    void delete(UUID uuid) throws SQLException;
 }

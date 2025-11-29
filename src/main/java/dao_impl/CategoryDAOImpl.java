@@ -59,11 +59,7 @@ public class CategoryDAOImpl implements CategoryDAO {
             byte[] idBytes = uuidToBytes(category.getCategoryId());
             stmt.setBytes(1, idBytes);
             stmt.setString(2, category.getName());
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new SQLException("Creating category failed, no rows affected.");
-            }
+            stmt.executeUpdate();
         }
 
         return category;
@@ -115,12 +111,11 @@ public class CategoryDAOImpl implements CategoryDAO {
     }
 
     @Override
-    public boolean delete(UUID uuid) throws SQLException {
+    public void delete(UUID uuid) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(DELETE_SQL)) {
             stmt.setBytes(1, uuidToBytes(uuid));
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0;
+            stmt.executeUpdate();
         }
     }
 }
