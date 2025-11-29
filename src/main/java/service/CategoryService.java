@@ -34,7 +34,7 @@ public class CategoryService {
         return categoryDAO.save(category);
     }
 
-    public Optional<Category> getCategoryById(UUID uuid) {
+    public static Optional<Category> getCategoryById(UUID uuid) {
         if(uuid == null) {
             throw new IllegalArgumentException("Category uuid cannot be null");
         }

@@ -7,6 +7,7 @@ import main.java.dao.ProductDAO;
 import main.java.model.Product;
 import main.java.model.Category;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -89,8 +90,15 @@ public class ProductService {
             }
 
             //now we collab with category
+            //this checks if product actually has a category id
             if(product.getCategoryId() != null){
-                
+
+                //this gets our category id from product
+                Optional<Category> referencedCategory = CategoryService.getCategoryById(product.getCategoryId());
+
+                if(referencedCategory.isEmpty()){
+                    throw new IllegalArgumentException("Invalid Category ID the specified Catefory "+ product.getCategoryId() + "does not exist");
+                }
             }
 
 
@@ -100,6 +108,22 @@ public class ProductService {
             throw new RuntimeException("A DB error prevented the product Update",e);
         }
 
+    }
+
+    List<Product> findLowStock(int threshold)throws SQLException{
+
+        if(threshold < 0){
+            throw new IllegalArgumentException("Threshold cannot be negative");
+        }
+        try{
+            //after we cheked if the threshold is not negative we can now find the low stock
+            return productDAO.findLowStock(threshold);
+        }catch(SQLException e){
+            System.err.println("DATABASE ERROR: Failed to retrieve low stock products for threshold " + threshold);
+            e.printStackTrace();
+
+            throw new RuntimeException("A data access error occurred while fetching low stock products.", e);
+        }
     }
 
 }
