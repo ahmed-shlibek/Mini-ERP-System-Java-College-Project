@@ -49,6 +49,15 @@ public class ProductService {
         if(productId == null){
             throw new IllegalArgumentException("Product Id cannot be null");
         }
+        try{
+            return productDAO.findByProductId(productId);
+        }catch(SQLException e){
+
+            System.err.println("DB error: failed to retrieve product ID"+ productId);
+            e.printStackTrace();
+
+            throw new RuntimeException("DB error occurred while getting product id",e);
+        }
     }
 
 
