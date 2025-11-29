@@ -92,28 +92,25 @@ public class OrderItemDAOImpl implements OrderItemDAO {
     }
 
     @Override
-    public List<OrderItem> findByOrderId(UUID orderId) {
+    public List<OrderItem> findByOrderId(UUID orderId) throws SQLException {
         List<OrderItem> orderItems = new ArrayList<>();
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(SELECT_BY_ORDER_ID_SQL)) {
 
             stmt.setBytes(1, uuidToBytes(orderId));
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                OrderItem item = mapResultSetToOrderItem(rs);
-                orderItems.add(item);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    OrderItem item = mapResultSetToOrderItem(rs);
+                    orderItems.add(item);
+                }
             }
-
-        } catch (SQLException e) {
-            System.err.println("Database error during select by Order ID: " + e.getMessage());
         }
         return orderItems;
     }
 
     @Override
-    public void update(OrderItem orderItem) {
+    public OrderItem update(OrderItem orderItem) throws SQLException {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
 
@@ -122,55 +119,32 @@ public class OrderItemDAOImpl implements OrderItemDAO {
             stmt.setBytes(3, uuidToBytes(orderItem.getOrderId()));
             stmt.setBytes(4, uuidToBytes(orderItem.getProductId()));
 
-            int affectedRows = stmt.executeUpdate();
-
-            if(affectedRows == 0){
-                System.err.println("Warning rows affected :"+ affectedRows + "the orderItem id:"+orderItem.getOrderId());
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Database error during update of Order Item: " + e.getMessage());
+            stmt.executeUpdate();
         }
+
+        return orderItem;
     }
 
     @Override
-    public void deleteByOrderId(UUID orderId) {
+    public void deleteByOrderId(UUID orderId) throws SQLException {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(DELETE_BY_ORDER_ID_SQL)) {
 
             stmt.setBytes(1, uuidToBytes(orderId));
 
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows > 0) {
-                System.out.println("OrderItem deleted successfully.");
-            } else {
-                System.out.println("OrderItem not found or already deleted.");
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Database error during delete of Order Item: " + e.getMessage());
+            stmt.executeUpdate();
         }
     }
 
     @Override
-    public void deleteByKeys(UUID orderId, UUID productId) {
+    public void deleteByKeys(UUID orderId, UUID productId) throws SQLException {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(DELETE_BY_KEYS_SQL)) {
 
             stmt.setBytes(1, uuidToBytes(orderId));
             stmt.setBytes(2, uuidToBytes(productId));
 
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows > 0) {
-                System.out.println("OrderItem deleted successfully.");
-            } else {
-                System.out.println("OrderItem not found or already deleted.");
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Database error during delete of Order Item: " + e.getMessage());
+            stmt.executeUpdate();
         }
     }
 }
