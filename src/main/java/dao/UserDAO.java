@@ -23,7 +23,7 @@ public interface UserDAO {
     User update(User user) throws SQLException;
 
     // this will delete user by user id
-    void delete(UUID userId)throws SQLException;
+    void delete(UUID userId) throws SQLException;
 
 
 }

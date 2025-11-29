@@ -16,7 +16,7 @@ public class UserDAOImpl implements UserDAO {
     private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password, role) VALUES (?, ?, ?, ?)";
     private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password, role FROM users WHERE username = ?";
     private static final String FIND_BY_ID_SQL = "SELECT user_id, username, password, role FROM users WHERE user_id = ?";
-    private static final String UPDATE_USER_SQL = "UPDATE users SET password =? , role = ? WHERE user_id = ?";
+    private static final String UPDATE_USER_SQL = "UPDATE users SET username = ?, password =? , role = ? WHERE user_id = ?";
     private static final String DELETE_BY_USER_ID_SQL ="DELETE FROM users WHERE user_id =?";
 
     //this will convert a uuid object(128 bits) to 16byte for efficency
@@ -137,18 +137,14 @@ public class UserDAOImpl implements UserDAO {
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(UPDATE_USER_SQL)){
             //we got the service layer to update these fields
-            ps.setString(1, user.getPassword());
-            ps.setString(2,user.getRole());
-            ps.setBytes(3,uuidToBytes(user.getUserId()));
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getPassword());
+            ps.setString(3,user.getRole());
+            ps.setBytes(4,uuidToBytes(user.getUserId()));
 
             //when we executed the update we got the whole ps to go the the sql to be executed
             //we called it and then it reutrns a number if 1 that means all goof if anything else then error
-            int rowsAffected = ps.executeUpdate();
-            //if we get 1 that means the update was succseful
-            if(rowsAffected !=1){
-                System.err.println("Warning update operation affected : "+rowsAffected + "the row for userid :"+ user.getUserId());
-            }
-
+            ps.executeUpdate();
         }
 
         return user;
@@ -162,20 +158,9 @@ public class UserDAOImpl implements UserDAO {
 
             ps.setBytes(1,uuidToBytes(userId));
 
-            int affectedRow = ps.executeUpdate();
-
-            if(affectedRow !=1){
-                System.err.println("Warning affected row"+ affectedRow + "The User ID:"+ userId);
-            }
-
-        }catch(SQLException e){
-
-            System.err.println("Error deleting user "+ userId);
-            System.err.println("SQL State:"+e.getSQLState() + "Error Code:"+ e.getErrorCode());
-            e.printStackTrace();
-            throw e;
+            ps.executeUpdate();
         }
     }
-    }
+}
 
 

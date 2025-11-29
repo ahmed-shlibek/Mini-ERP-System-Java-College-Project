@@ -70,26 +70,4 @@ public class User {
                 ", Username : " + username +
                 ", User Role :" + role + " }";
     }
-
-    //we will add an override for equals because if we call a user object then call it again later it
-    //gonna create another object these two are the same but have different locations so its gonna think
-    //they are different
-
-    @Override
-    public boolean equals(Object o){
-        // this : is the object that was called
-        //checks if they have the same memory location if yes then clearly the same
-        if (this == o)return true;
-
-        // checks if object is null then sees if the object that was called is the same type
-        // as the user object we have if not then not equal
-        if(o == null || getClass() != o.getClass());
-
-        //after checking if the object is a user we then cast to access its user id
-        User user = (User) o;
-
-        //this now sees if our current object has the same userid as the one we just casted
-        return userId.equals(user.userId);
-    }
-
 }
