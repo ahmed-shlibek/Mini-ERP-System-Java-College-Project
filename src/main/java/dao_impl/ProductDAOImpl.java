@@ -77,7 +77,7 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public void save(Product product)throws SQLException{
+    public Product insert(Product product)throws SQLException{
         if(product.getProductId() == null){
             product.setProductId(UUID.randomUUID());
         }
@@ -105,7 +105,7 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public void update(Product product)throws SQLException{
+    public Product update(Product product)throws SQLException{
 
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(UPDATE_PRODUCT_SQL)){
@@ -126,6 +126,7 @@ public class ProductDAOImpl implements ProductDAO {
             e.printStackTrace();
             throw e;
         }
+        return product;
     }
 
     @Override
