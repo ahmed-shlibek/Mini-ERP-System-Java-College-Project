@@ -14,7 +14,7 @@ import java.util.UUID;
 public class OrderDAOImpl implements OrderDAO {
 
     private static final String INSERT_ORDER_SQL = "INSERT INTO orders(order_id, user_id) VALUES (?, ?)";
-    private static final String SELECT_BY_Order_ID_SQL = "SELECT order_id, user_id,status ,created_at FROM orders WHERE order_id = ?";
+    private static final String SELECT_BY_ORDER_ID_SQL = "SELECT order_id, user_id,status ,created_at FROM orders WHERE order_id = ?";
     private static final String SELECT_BY_USER_ID_SQL = "SELECT order_id, user_id,status ,created_at FROM orders WHERE user_id = ?";
     private static final String SELECT_BY_DATE_SQL = "SELECT order_id, user_id,status ,created_at FROM orders WHERE created_at BETWEEN ? AND ?";
     private static final String SELECT_ALL_SQL = "SELECT order_id, user_id,status ,created_at FROM orders";
@@ -53,7 +53,7 @@ public class OrderDAOImpl implements OrderDAO {
     }
 
     @Override
-    public Order save(Order order) {
+    public Order save(Order order) throws SQLException {
         if(order.getOrderId() == null) {
             order.setOrderId(UUID.randomUUID());
         }
@@ -65,41 +65,31 @@ public class OrderDAOImpl implements OrderDAO {
             byte[] userIdBytes = uuidToBytes(order.getUserId());
             stmt.setBytes(2, userIdBytes);
 
-            int  affectedRows = stmt.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new SQLException("Creating order failed, no rows affected.");
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Database error while saving order: " + e.getMessage());
+            stmt.executeUpdate();
         }
+
         return order;
     }
 
     @Override
-    public Optional<Order> findById(UUID orderId) {
+    public Optional<Order> findById(UUID orderId)  throws SQLException {
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SELECT_BY_Order_ID_SQL)) {
+             PreparedStatement stmt = conn.prepareStatement(SELECT_BY_ORDER_ID_SQL)) {
 
             stmt.setBytes(1, uuidToBytes(orderId));
-            ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) {
-                Order order = mapResultSetToOrder(rs);
-                return Optional.of(order);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Order order = mapResultSetToOrder(rs);
+                    return Optional.of(order);
+                }
             }
-
             return Optional.empty();
-
-        } catch (SQLException e) {
-            System.err.println("Database error while fetching order: " + e.getMessage());
         }
-        return Optional.empty();
     }
 
     @Override
-    public List<Order> findByUserId(UUID userId) {
+    public List<Order> findByUserId(UUID userId) throws SQLException {
         List<Order> orders = new ArrayList<>();
 
         try (Connection conn = DBConnection.getConnection();
@@ -113,15 +103,13 @@ public class OrderDAOImpl implements OrderDAO {
                 orders.add(order);
             }
 
-        } catch (SQLException e) {
-            System.err.println("Database error while fetching orders: " + e.getMessage());
         }
 
         return orders;
     }
 
     @Override
-    public List<Order> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+    public List<Order> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
         List<Order> orders = new ArrayList<>();
 
         try (Connection conn = DBConnection.getConnection();
@@ -136,15 +124,13 @@ public class OrderDAOImpl implements OrderDAO {
                 Order order = mapResultSetToOrder(rs);
                 orders.add(order);
             }
-        } catch (SQLException e) {
-            System.err.println("Database error while fetching orders: " + e.getMessage());
         }
 
         return orders;
     }
 
     @Override
-    public List<Order> findAll() {
+    public List<Order> findAll() throws SQLException {
         List<Order> orders = new ArrayList<>();
 
         try (Connection conn = DBConnection.getConnection();
@@ -156,47 +142,31 @@ public class OrderDAOImpl implements OrderDAO {
                 Order order = mapResultSetToOrder(rs);
                 orders.add(order);
             }
-        } catch (SQLException e) {
-            System.err.println("Database error while fetching orders: " + e.getMessage());
         }
 
         return orders;
     }
 
     @Override
-    public void update(Order order) {
+    public Order update(Order order) throws SQLException {
         try (Connection conn = DBConnection.getConnection();
         PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
 
             stmt.setString(1, order.getStatus());
             stmt.setBytes(2, uuidToBytes(order.getOrderId()));
-            int affectedRows = stmt.executeUpdate();
-
-            if(affectedRows == 0){
-                System.err.println("Warning rows affected :"+ affectedRows + "the order id:"+order.getOrderId());
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Database error while updating order: " + e.getMessage());
+            stmt.executeUpdate();
         }
+
+        return order;
     }
 
     @Override
-    public void delete(UUID orderId) {
+    public void delete(UUID orderId) throws SQLException {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
 
             stmt.setBytes(1, uuidToBytes(orderId));
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows > 0) {
-                System.out.println("Order with ID " + orderId + " deleted successfully.");
-            } else {
-                System.out.println("Order with ID " + orderId + " not found or already deleted.");
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Database error while deleting order: " + e.getMessage());
+            stmt.executeUpdate();
         }
     }
 }
