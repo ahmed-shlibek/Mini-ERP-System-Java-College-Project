@@ -16,12 +16,12 @@ import java.util.UUID;
 public class ProductDAOImpl implements ProductDAO {
 
     private static final String INSERT_PRODUCT_SQL = "INSERT INTO products (product_id , name ,category_id, price,quantity ) VALUES (?,?,?,?,?)";
-    private static final String UPDATE_PRODUCT_SQL = "UPDATE products SET price =? , SET quantity =? WHERE product_id= ?";
+    private static final String UPDATE_PRODUCT_SQL = "UPDATE products SET name = ?, category_id = ?, price = ? ,quantity =? WHERE product_id= ?";
     private static final String DELETE_PRODUCT_SQL = "DELETE FROM products where product_id = ?";
     private static final String FIND_BY_PRODUCTID_SQL ="SELECT * FROM products WHERE product_id =?";
     private static final String FIND_BY_PRODUCTNAME_SQL = "SELECT * FROM products WHERE name=?";
     private static final String FIND_ALL_SQL = "SELECT * FROM products";
-    private static final String FIND_LOW_STOCK_SQL = "SELECET * FROM products WHERE quantity < ?";
+    private static final String FIND_LOW_STOCK_SQL = "SELECT * FROM products WHERE quantity < ?";
 
 
     //uuid object to 16 byte
@@ -55,7 +55,7 @@ public class ProductDAOImpl implements ProductDAO {
 
     private Product mapResultSetToProduct (ResultSet rs)throws SQLException{
         byte[] pidBytes = rs.getBytes("product_id");
-        //basically got the product id from the data base and then changed it to our uuid
+        //basically got the product id from the database and then changed it to our uuid
         UUID productId = byteToUUID(pidBytes);
 
         //also had to convert the category id
@@ -77,12 +77,12 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public Product insert(Product product)throws SQLException{
+    public Product save(Product product) throws SQLException {
         if(product.getProductId() == null){
             product.setProductId(UUID.randomUUID());
         }
         try(Connection conn = DBConnection.getConnection();
-        PreparedStatement ps = conn.prepareStatement(INSERT_PRODUCT_SQL)){
+            PreparedStatement ps = conn.prepareStatement(INSERT_PRODUCT_SQL)) {
 
             byte[] productIdBytes = uuidToByte(product.getProductId());
             byte[] categoryIdBytes = uuidToByte(product.getCategoryId());
@@ -94,14 +94,10 @@ public class ProductDAOImpl implements ProductDAO {
             ps.setInt(5,product.getQuantity());
 
             ps.executeUpdate();
-        }catch(SQLException e){
 
-            System.err.println("Error Inserting Product "+ product.getName());
-            System.err.println("SQL State: "+ e.getSQLState() + "Error Code: "+ e.getErrorCode());
-            e.printStackTrace();
-
-            throw e;
         }
+
+        return product;
     }
 
     @Override
@@ -110,22 +106,15 @@ public class ProductDAOImpl implements ProductDAO {
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(UPDATE_PRODUCT_SQL)){
 
-            ps.setDouble(1,product.getPrice());
-            ps.setInt(2,product.getQuantity());
-            ps.setBytes(3,uuidToByte(product.getProductId()));
+            ps.setString(1,product.getName());
+            ps.setBytes(2,uuidToByte(product.getCategoryId()));
+            ps.setLong(3,product.getPrice());
+            ps.setInt(4,product.getQuantity());
+            ps.setBytes(5,uuidToByte(product.getProductId()));
 
-            int rowsaffected = ps.executeUpdate();
-
-            if(rowsaffected == 0){
-                System.err.println("Warning rows affected :"+ rowsaffected + "the product id:"+product.getProductId());
-            }
-        }catch(SQLException e){
-
-            System.err.println("Error Updating product "+ product.getName());
-            System.err.println("SQL State:"+e.getSQLState()+"Error Code:" +e.getErrorCode());
-            e.printStackTrace();
-            throw e;
+            ps.executeUpdate();
         }
+
         return product;
     }
 
@@ -136,17 +125,7 @@ public class ProductDAOImpl implements ProductDAO {
         PreparedStatement ps = conn.prepareStatement(DELETE_PRODUCT_SQL)){
 
             ps.setBytes(1,uuidToByte(productId));
-            int affectedRows = ps.executeUpdate();
-
-            if(affectedRows != 1){
-                System.err.println("Warning affected row :"+ affectedRows + " The Product id:"+ productId);
-
-            }
-        }catch(SQLException e){
-            System.err.println("Error Deleting product" + productId);
-            System.err.println("SQLState:"+ e.getSQLState()+"Error Code:"+e.getErrorCode());
-            e.printStackTrace();
-            throw e;
+            ps.executeUpdate();
         }
     }
 
@@ -171,39 +150,30 @@ public class ProductDAOImpl implements ProductDAO {
                     // if user found we return user if not we return an empty container
                     //the query worked but did not find the product
                 }return Optional.empty();
-
-            }catch(SQLException e){
-
-                System.err.println("Error Product not found" + e.getMessage());
             }
-
-            //we have this return if the querry failed so we return empty
-        }return Optional.empty();
+        }
     }
 
 
     @Override
-    public Optional<Product> findByProductName(String name)throws SQLException{
+    public Optional<Product> findByProductName(String name)throws SQLException {
 
-        try(Connection conn = DBConnection.getConnection();
-        PreparedStatement ps = conn.prepareStatement(FIND_BY_PRODUCTNAME_SQL)){
-            ps.setString(1,name);
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(FIND_BY_PRODUCTNAME_SQL)) {
+            ps.setString(1, name);
 
-            try(ResultSet rs = ps.executeQuery()){
+            try (ResultSet rs = ps.executeQuery()) {
 
-                if(rs.next()) {
+                if (rs.next()) {
 
                     Product product = mapResultSetToProduct(rs);
                     return Optional.of(product);
 
-                    }return Optional.empty();
-                }catch(SQLException e){
-
-                //we use e.getMessage cuz it prints a human readable error
-                System.err.println("Error did not find product"+ e.getMessage());
+                }
+                return Optional.empty();
             }
-            }return Optional.empty();
         }
+    }
 
     @Override
     public List<Product> findAll()throws SQLException{
@@ -227,16 +197,8 @@ public class ProductDAOImpl implements ProductDAO {
                 }
 
             }
-        }catch(SQLException e){
-
-            System.err.println("Error not able to retrieve any Products");
-            System.err.println("SQL State:"+ e.getSQLState() +"Error Code:"+e.getErrorCode());
-            e.printStackTrace();
-
-            throw e;
         }
         return allProducts;
-
     }
 
 
@@ -262,12 +224,6 @@ public class ProductDAOImpl implements ProductDAO {
                     lowStockProducts.add(product);
                 }
             }
-        }catch(SQLException e){
-
-            System.err.println("Error finding low stock products -- Threshold:"+ threshold);
-            System.err.println("SQL State:"+ e.getSQLState()+ "Error Code:" +e.getErrorCode());
-
-            throw e;
         }
         return lowStockProducts;
     }

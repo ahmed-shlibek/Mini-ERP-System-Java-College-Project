@@ -2,7 +2,6 @@ package main.java.service;
 
 import main.java.dao.CategoryDAO;
 import main.java.model.Category;
-
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +38,7 @@ public class CategoryService {
         }
     }
 
-    public static Optional<Category> getCategoryById(UUID uuid) {
+    public Optional<Category> getCategoryById(UUID uuid) {
         if(uuid == null) {
             throw new IllegalArgumentException("Category uuid cannot be null");
         }
