@@ -1,8 +1,9 @@
 package main.java.service;
 
-import com.sun.source.tree.TryTree;
+
 import main.java.dao.UserDAO;
 import main.java.model.User;
+import main.java.util.SecurityUtil;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,9 +38,32 @@ public class UserService {
                 throw new IllegalArgumentException("Username '" + user.getUsername() + "' already exists.");
             }
 
+            String hashedPassword = SecurityUtil.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
+
             return userDAO.save(user);
         } catch (SQLException e) {
             throw new RuntimeException("Database error occurred while creating user: " + user.getUsername(), e);
+        }
+    }
+
+    public User login(String username, String password) {
+        try {
+            Optional<User> userOpt = userDAO.findByUserName(username);
+
+            if(userOpt.isEmpty()) {
+                throw new SecurityException("Invalid credentials.");
+            }
+
+            User user = userOpt.get();
+
+            if(! SecurityUtil.verifyPassword(password, user.getPassword())) {
+                throw new SecurityException("Invalid credentials.");
+            }
+
+            return user;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error during login for user: " + username, e);
         }
     }
 
