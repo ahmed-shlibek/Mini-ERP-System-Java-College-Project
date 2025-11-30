@@ -33,8 +33,7 @@ public class ProductService {
             throw new IllegalArgumentException("Product name cannot be null or empty");
         }
 
-        //this will basically make the first letter of product Uppercase and the rest Lower. it also checks if the
-        //product name is null or not
+        //this makes the product all lower case
         String normalizedString = product.getName().trim().toLowerCase();
 
         try {
@@ -48,17 +47,6 @@ public class ProductService {
             return productDAO.save(product);
         } catch (SQLException e) {
             throw new RuntimeException("Database operation failed during product creation.", e);
-        }
-    }
-
-    public Optional<Product> getProductById(UUID productId) {
-        if(productId == null){
-            throw new IllegalArgumentException("Product Id cannot be null");
-        }
-        try{
-            return productDAO.findByProductId(productId);
-        }catch(SQLException e){
-            throw new RuntimeException("Database error occurred while fetching product with ID: " + productId, e);
         }
     }
 
@@ -136,4 +124,48 @@ public class ProductService {
         }
     }
 
+    public Optional<Product> getProductById(UUID productId) {
+        if(productId == null){
+            throw new IllegalArgumentException("Product Id cannot be null");
+        }
+        try{
+            return productDAO.findByProductId(productId);
+        }catch(SQLException e){
+            throw new RuntimeException("Database error occurred while fetching product with ID: " + productId, e);
+        }
+    }
+
+    public Optional<Product> getProductByName(String name){
+        if(name == null || name.trim().isEmpty()){
+            throw new IllegalArgumentException("name cannot be null");
+        }
+        try{
+            return productDAO.findByProductName(name);
+        }catch(SQLException e){
+            throw new RuntimeException("DataBase occurred while getting product:"+name);
+        }
+    }
+
+    public void deleteProduct(UUID uuid){
+        if(uuid == null){
+            throw new IllegalArgumentException("product ID cannot be null");
+        }
+        try{
+            if(productDAO.findByProductId(uuid).isEmpty()){
+                throw new IllegalArgumentException("Cannot delete Product , product with "+uuid + "cannot be found");
+            }
+            productDAO.delete(uuid);
+
+        }catch(SQLException e){
+            throw new RuntimeException("DataBase error occurred while deleting Product:"+uuid,e);
+        }
+    }
+    
+    public List<Product> getAllProducts(){
+        try{
+            return productDAO.findAll();
+        }catch(SQLException e){
+            throw new RuntimeException("DataBase error occurred while fetching all products");
+        }
+    }
 }
