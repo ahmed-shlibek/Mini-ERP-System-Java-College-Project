@@ -16,6 +16,7 @@ public class Product {
     public Product(String name , UUID category , long price, int quantity){
 
         this.productId = UUID.randomUUID();
+        this.categoryId = category;
         this.name = name;
         this.price = price;
         this.quantity = quantity;

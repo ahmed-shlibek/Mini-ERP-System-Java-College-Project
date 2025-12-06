@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ProductService {
+public class InventoryService {
 
     //this basically tells us to use productservices we need an object of the productdao,
     //were basically here using dependecy
     private final ProductDAO productDAO;
     private final CategoryService categoryService;
 
-    public ProductService(ProductDAO productDAO, CategoryService categoryService) {
+    public InventoryService(ProductDAO productDAO, CategoryService categoryService) {
         this.productDAO = productDAO;
         this.categoryService = categoryService;
     }

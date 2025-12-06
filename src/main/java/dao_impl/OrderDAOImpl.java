@@ -150,7 +150,7 @@ public class OrderDAOImpl implements OrderDAO {
     @Override
     public Order update(Order order) throws SQLException {
         try (Connection conn = DBConnection.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
 
             stmt.setString(1, order.getStatus());
             stmt.setBytes(2, uuidToBytes(order.getOrderId()));

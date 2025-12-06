@@ -15,6 +15,8 @@ public interface ProductDAO {
     //function to update Product
     Product update(Product product)throws SQLException;
 
+    void updateStock(UUID productId, int quantityChange) throws SQLException;
+
     //deleted a product
     void delete(UUID productId)throws SQLException;
 

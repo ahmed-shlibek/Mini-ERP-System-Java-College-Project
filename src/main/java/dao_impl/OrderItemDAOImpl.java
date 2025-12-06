@@ -2,12 +2,10 @@ package main.java.dao_impl;
 
 import main.java.dao.OrderItemDAO;
 import main.java.database.DBConnection;
-import main.java.model.Order;
 import main.java.model.OrderItem;
 
 import java.nio.ByteBuffer;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -53,40 +51,46 @@ public class OrderItemDAOImpl implements OrderItemDAO {
     }
 
     @Override
-    public void saveAll(List<OrderItem> items) {
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(INSERT_SQL)) {
-
+    public void saveAll(List<OrderItem> items) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
-            for (OrderItem item : items) {
+            try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL)) {
+                for (OrderItem item : items) {
 
-                if (item.getOrderId() == null || item.getProductId() == null) {
-                    System.err.println("Skipping item due to missing Order or Product ID.");
-                    continue;
+                    if (item.getOrderId() == null || item.getProductId() == null) {
+                        continue;
+                    }
+
+                    stmt.setBytes(1, uuidToBytes(item.getOrderId()));
+                    stmt.setBytes(2, uuidToBytes(item.getProductId()));
+                    stmt.setLong(3, item.getPriceAtOrder());
+                    stmt.setInt(4, item.getQuantity());
+
+                    stmt.addBatch();
                 }
 
-                stmt.setBytes(1, uuidToBytes(item.getOrderId()));
-                stmt.setBytes(2, uuidToBytes(item.getProductId()));
-                stmt.setLong(3, item.getPriceAtOrder());
-                stmt.setInt(4, item.getQuantity());
-
-                stmt.addBatch();
+                stmt.executeBatch();
+                conn.commit();
             }
-
-            int[] updateCounts = stmt.executeBatch();
-
-            //con commit is used to basicaly save the new changes after the latest changes
-            conn.commit();
         } catch (SQLException e) {
-            System.err.println("Database error during batch insert of Order Items: " + e.getMessage());
             try {
-                if (DBConnection.getConnection() != null) {
-                    DBConnection.getConnection().rollback();
-                    System.out.println("Database rollback successful.");
+                if (conn != null && !conn.isClosed()) {
+                    conn.rollback();
                 }
-            } catch (SQLException rollbackEx) {
-                System.err.println("Error during rollback: " + rollbackEx.getMessage());
+            } catch (SQLException ex) {
+
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                }
             }
         }
     }

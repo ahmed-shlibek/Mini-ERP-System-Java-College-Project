@@ -22,6 +22,7 @@ public class ProductDAOImpl implements ProductDAO {
     private static final String FIND_BY_PRODUCTNAME_SQL = "SELECT * FROM products WHERE name=?";
     private static final String FIND_ALL_SQL = "SELECT * FROM products";
     private static final String FIND_LOW_STOCK_SQL = "SELECT * FROM products WHERE quantity < ?";
+    private static final String UPDATE_STOCK_SQL = "UPDATE products SET quantity = quantity + ? WHERE product_id = ?";
 
 
     //uuid object to 16 byte
@@ -116,6 +117,20 @@ public class ProductDAOImpl implements ProductDAO {
         }
 
         return product;
+    }
+
+    @Override
+    public void updateStock(UUID productId, int quantityChange) throws SQLException {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_STOCK_SQL)) {
+
+            stmt.setInt(1, quantityChange);
+
+            stmt.setBytes(2, uuidToByte(productId));
+
+            stmt.executeUpdate();
+
+        }
     }
 
     @Override
