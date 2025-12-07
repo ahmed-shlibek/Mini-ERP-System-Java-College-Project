@@ -111,6 +111,22 @@ public class InventoryService {
 
     }
 
+    public void updateProductQuantity(UUID productId, int quantity) {
+        if(productId == null){
+            throw new IllegalArgumentException("Product Id cannot be null");
+        }
+
+        if(quantity < 0){
+            throw new IllegalArgumentException("quantity cannot be negative");
+        }
+
+        try {
+            productDAO.updateStock(productId, quantity);
+        } catch (SQLException e) {
+            throw new RuntimeException("Database operation failed during product update.", e);
+        }
+    }
+
     public List<Product> findLowStock(int threshold) {
 
         if(threshold < 0){
