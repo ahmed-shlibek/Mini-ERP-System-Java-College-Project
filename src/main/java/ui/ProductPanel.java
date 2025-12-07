@@ -34,12 +34,14 @@ public class ProductPanel extends JPanel {
         setLayout(new BorderLayout(10, 10)); // تنسيق إطار المنتج
 
         // 1. جلب الأصناف أولاً
+        //we get the categories first
         loadCategories();
 
         // 2. تهيئة الجدول
         initializeTable();
 
         // 3. إضافة الجدول إلى لوحة Scrolling
+        //we make the table scrollable if needed
         JScrollPane scrollPane = new JScrollPane(productTable);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -61,14 +63,14 @@ public class ProductPanel extends JPanel {
                 categoryMap.put(c.getCategoryId(), c.getName());
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "خطأ في تحميل الأصناف: " + e.getMessage(),
-                    "خطأ قاعدة البيانات", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Failed to load Categories " + e.getMessage(),
+                    "Error in Data Base", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void initializeTable() {
         // أعمدة الجدول
-        String[] columnNames = {"ID", "الاسم", "الصنف", "السعر", "المخزون"};
+        String[] columnNames = {"ID", "Name", "Category", "Price", "Quantity"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {

@@ -22,7 +22,7 @@ public class DashboardFrame extends JFrame {
         this.categoryController = categoryController; // حقن التبعية
 
         // إعدادات النافذة
-        setTitle("لوحة التحكم الرئيسية - مرحباً " + SessionUtil.getCurrentUser().getUsername());
+        setTitle("Main Dash Board - Welcome" + SessionUtil.getCurrentUser().getUsername());
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // نتحكم في الإغلاق لعمل Logout
         setLocationRelativeTo(null);
@@ -32,8 +32,8 @@ public class DashboardFrame extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 if (JOptionPane.showConfirmDialog(DashboardFrame.this,
-                        "هل أنت متأكد من تسجيل الخروج والإغلاق؟",
-                        "تسجيل الخروج", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                        "Are you sure you want to Log Out?",
+                        "Log Out", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                     SessionUtil.logout();
                     System.exit(0);
                 }
@@ -45,18 +45,18 @@ public class DashboardFrame extends JFrame {
 
         // 1. لوحة المنتجات (تمرير CategoryController)
         ProductPanel productPanel = new ProductPanel(inventoryController, categoryController);
-        tabbedPane.addTab("إدارة المنتجات", productPanel);
+        tabbedPane.addTab("Product Management", productPanel);
 
         // 2. لوحة الطلبات (وهمية حالياً)
         JPanel ordersPanel = new JPanel();
         ordersPanel.add(new JLabel("شاشة إدارة الطلبات قريباً..."));
-        tabbedPane.addTab("إدارة الطلبات", ordersPanel);
+        tabbedPane.addTab("Order Management", ordersPanel);
 
         // 3. لوحة المستخدمين (للأدمين فقط - وهمية حالياً)
         if ("ADMIN".equalsIgnoreCase(SessionUtil.getCurrentUser().getRole())) {
             JPanel userPanel = new JPanel();
             userPanel.add(new JLabel("شاشة إدارة المستخدمين قريباً..."));
-            tabbedPane.addTab("إدارة المستخدمين", userPanel);
+            tabbedPane.addTab("User Management", userPanel);
         }
 
         add(tabbedPane, BorderLayout.CENTER);
