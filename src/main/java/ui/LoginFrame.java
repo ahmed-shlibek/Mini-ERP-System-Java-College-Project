@@ -28,16 +28,19 @@ public class LoginFrame extends JFrame {
     private JButton loginButton;
 
     // دالة البناء تستقبل Controllers المطلوبة
+    //our constructor
     public LoginFrame(AuthController authController, InventoryController inventoryController, CategoryController categoryController) {
         this.authController = authController;
         this.inventoryController = inventoryController;
         this.categoryController = categoryController; // حقن التبعية
 
         // إعدادات النافذة الرئيسية
-        setTitle("تسجيل الدخول - نظام إدارة الموارد");
+        //we have these default settings for our pannel
+        setTitle("Mini ERP System Login");
         setSize(400, 250);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // وضع النافذة في منتصف الشاشة
+        // here we use null to have the pannel in the middle of the screen
+        setLocationRelativeTo(null);
 
         // بناء اللوحة (Panel) التي تحتوي على حقول الإدخال
         JPanel panel = createLoginPanel();
@@ -47,18 +50,23 @@ public class LoginFrame extends JFrame {
     private JPanel createLoginPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        //we use the gbc to help us organize the different sections and fields in our pannel
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8); // المسافات الداخلية
 
-        // --- حقل اسم المستخدم ---
+        //here we have the username label
+        //gridx represents the column index and gridy represents the rows
         gbc.gridx = 0;
         gbc.gridy = 0;
+        //gbc.anchor helps us choose where to display our label
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(new JLabel("اسم المستخدم:"), gbc);
+        panel.add(new JLabel("Username:"), gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 0;
+        //makes the field horizontal
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        //input field 15 long
         usernameField = new JTextField(15);
         panel.add(usernameField, gbc);
 
@@ -66,7 +74,7 @@ public class LoginFrame extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(new JLabel("كلمة المرور:"), gbc);
+        panel.add(new JLabel("Password:"), gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
@@ -78,7 +86,7 @@ public class LoginFrame extends JFrame {
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.EAST;
-        loginButton = new JButton("تسجيل الدخول");
+        loginButton = new JButton("Login");
         loginButton.setPreferredSize(new Dimension(150, 30));
         loginButton.addActionListener(new LoginButtonListener());
         panel.add(loginButton, gbc);
@@ -98,8 +106,8 @@ public class LoginFrame extends JFrame {
             if (authController.login(username, password)) {
                 // النجاح: إخفاء نافذة الدخول وعرض لوحة التحكم
                 JOptionPane.showMessageDialog(LoginFrame.this,
-                        "تم تسجيل الدخول بنجاح! مرحباً " + SessionUtil.getCurrentUser().getUsername(),
-                        "نجاح", JOptionPane.INFORMATION_MESSAGE);
+                        "Welcome " + SessionUtil.getCurrentUser().getUsername(),
+                        "Login Successful", JOptionPane.INFORMATION_MESSAGE);
 
                 // إخفاء هذه النافذة
                 dispose();
@@ -107,6 +115,13 @@ public class LoginFrame extends JFrame {
                 // عرض لوحة التحكم بمرور جميع Controllers المطلوبة
                 new DashboardFrame(inventoryController, categoryController).setVisible(true);
 
+            }else{
+                JOptionPane.showMessageDialog(LoginFrame.this,
+                        "Invalid Username or Password",
+                        "Login Failed", JOptionPane.ERROR_MESSAGE);
+
+                //here we cleared the password text for security reasons
+                passwordField.setText("");
             }
         }
     }
