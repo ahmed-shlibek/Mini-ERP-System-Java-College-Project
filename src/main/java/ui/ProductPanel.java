@@ -27,6 +27,13 @@ public class ProductPanel extends JPanel {
     // لربط اسم الصنف بالـ UUID
     private Map<UUID, String> categoryMap = new HashMap<>();
 
+    //can use these for our column later
+    private static final int ID_COLUMN = 0;
+    private static final int NAME_COLUMN = 1;
+    private static final int CATEGORY_COLUMN = 2;
+    private static final int PRICE_COLUMN = 3;
+    private static final int QUANTITY_COLUMN = 4;
+
     public ProductPanel(InventoryController inventoryController, CategoryController categoryController) {
         this.inventoryController = inventoryController;
         this.categoryController = categoryController; // حقن التبعية
@@ -270,10 +277,113 @@ public class ProductPanel extends JPanel {
      * فتح نافذة لتحديث كمية المخزون لمنتج موجود.
      */
     private void showUpdateStockDialog() {
-        // يتم طلب ID المنتج والكمية الجديدة
-        JOptionPane.showMessageDialog(this, "سيتم تنفيذ نافذة تحديث المخزون هنا.",
-                "قيد التنفيذ", JOptionPane.INFORMATION_MESSAGE);
-        // بعد التنفيذ الناجح: loadProducts();
+
+        int selectedRow = productTable.getSelectedRow();
+        if(selectedRow == -1){
+            JOptionPane.showMessageDialog(this,
+                    "Please choose a Product from the table to Update",
+                    "Selection Required",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if(!"ADMIN".equalsIgnoreCase(SessionUtil.getCurrentUser().getRole())){
+            JOptionPane.showMessageDialog(this,
+                    "Unauthorized access. Only Admin can update Inventory/Price.",
+                    "Permission Denied",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        UUID productIdToUpdate = (UUID) tableModel.getValueAt(selectedRow, ID_COLUMN);
+        String currentName = (String) tableModel.getValueAt(selectedRow, NAME_COLUMN);
+        String currentPrice = (String) tableModel.getValueAt(selectedRow, PRICE_COLUMN);
+        //quantity is stored as int in table model but need it to be string
+        String currentQuantity = String.valueOf(tableModel.getValueAt(selectedRow, QUANTITY_COLUMN));
+
+        //these are our input fields with prefilled data inside(selected row)
+        JTextField priceField = new JTextField(currentPrice, 10);
+        JTextField quantityField = new JTextField(currentQuantity, 10);
+
+        //now we group fields in a panel
+        JPanel dialogPanel = new JPanel(new GridLayout(0,2,5,5));
+        dialogPanel.add(new JLabel("Product:"));
+        dialogPanel.add(new JLabel(currentName));//displays the name but not editable
+        dialogPanel.add(new JLabel("Price:"));
+        dialogPanel.add(priceField);
+        dialogPanel.add(new JLabel("Quantity:"));
+        dialogPanel.add(quantityField);
+
+        JOptionPane.showMessageDialog(this,
+                "Modify only the fields you wish to update. Changes will only be applied if the value differs from the original.",
+                "Partial Update Mode", JOptionPane.INFORMATION_MESSAGE);
+
+        int result = JOptionPane.showConfirmDialog(this, dialogPanel,
+                "Update Price and Inventory for: " + currentName, JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
+
+        if(result == JOptionPane.OK_OPTION){
+            try{
+                //we read the new inputs
+                String newPriceInput = priceField.getText().trim();
+                String newQuantityInput = quantityField.getText().trim();
+
+                //hold null if no change happened
+                Long updatePriceInCents = null;
+                Integer updateQuantity = null;
+
+                //this cheks if any changes actually happened
+                boolean priceChanged = !newPriceInput.equals(currentPrice);
+                boolean quantityChanged = !newQuantityInput.equals(currentQuantity);
+
+                //here now we check if there is actually changes and if there is then we convert from string to double
+                if (priceChanged && !newPriceInput.isEmpty()) {
+                    try {
+                        double newPriceDouble = Double.parseDouble(newPriceInput);
+                        updatePriceInCents = (long) (newPriceDouble * 100);
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(this,
+                                "Invalid price entered. Price field will be ignored.",
+                                "Input Warning", JOptionPane.WARNING_MESSAGE);
+                        priceChanged = false; // Mark as not changed if input was invalid
+                    }
+                }
+
+                if(quantityChanged && !newQuantityInput.isEmpty()){
+                    try {
+                        updateQuantity = Integer.parseInt(newQuantityInput);//parse basically means to break down info
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(this,
+                                "Invalid quantity entered. Quantity field will be ignored.",
+                                "Input Warning", JOptionPane.WARNING_MESSAGE);
+                        quantityChanged = false; // Mark as not changed if input was invalid
+                    }
+                }
+
+                //ensures one field is actually updated
+                if (updatePriceInCents == null && updateQuantity == null) {
+                    JOptionPane.showMessageDialog(this,
+                            "No valid changes detected.",
+                            "No Change", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+
+                inventoryController.updateProductDetails(
+                        productIdToUpdate,
+                        updatePriceInCents,
+                        updateQuantity
+                );
+
+                JOptionPane.showMessageDialog(this,
+                        "Product: " + currentName + " updated successfully!",
+                        "Update Success", JOptionPane.INFORMATION_MESSAGE);
+                loadProducts();
+
+            }catch(Exception e){
+                JOptionPane.showMessageDialog(this,
+                        "Update Failed: "+e.getMessage(),
+                        "Error",JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
     }
 
     private void showDeleteCategoryDialog(){

@@ -7,6 +7,7 @@ import main.java.service.InventoryService;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -52,9 +53,65 @@ public class InventoryController {
     /**
      * تحديث كمية المخزون لمنتج معين.
      */
-    public void updateProductStock(UUID productId, int newQuantity) throws Exception {
-        // يتم استخدام ProductService هنا
-        inventoryService.updateProductQuantity(productId, newQuantity);
+    public Product updateProductDetails(
+            UUID productId,
+            Long newPriceInCents,
+            Integer newQuantity) {
+
+        if (productId == null) {
+            throw new IllegalArgumentException("Product ID must be provided for update.");
+        }
+
+        // Basic check: at least one field must be provided for update
+        if (newPriceInCents == null && newQuantity == null) {
+            throw new IllegalArgumentException("Must provide a new price, a new quantity, or both for the update.");
+        }
+
+        try {
+            // Check for the most efficient path: Stock Update ONLY
+            // This path avoids fetching the product and using the full update logic.
+            boolean isOnlyQuantityUpdate = (newPriceInCents == null && newQuantity != null);
+
+            if (isOnlyQuantityUpdate) {
+                // SCENARIO A: Only Quantity (Stock) Update
+                if (newQuantity < 0) {
+                    throw new IllegalArgumentException("Quantity update cannot be negative.");
+                }
+
+                // Call the specialized service method (which performs the stock update efficiently)
+                inventoryService.updateProductQuantity(productId, newQuantity);
+
+                // Fetch and return the result
+                return inventoryService.getProductById(productId).orElseThrow(
+                        () -> new RuntimeException("Update succeeded, but product could not be fetched.")
+                );
+
+            } else {
+                // SCENARIO B: Price Update, or Price and Quantity Update
+
+                // 1. Fetch the existing product to get current state (e.g., name, categoryId, etc.)
+                Optional<Product> optionalProduct = inventoryService.getProductById(productId);
+                if (optionalProduct.isEmpty()) {
+                    throw new IllegalArgumentException("Product with ID " + productId + " not found.");
+                }
+                Product productToUpdate = optionalProduct.get();
+
+                // 2. Apply updates ONLY if the new value is provided (not null)
+                if (newPriceInCents != null) {
+                    productToUpdate.setPrice(newPriceInCents);
+                }
+                if (newQuantity != null) {
+                    productToUpdate.setQuantity(newQuantity);
+                }
+
+                // 3. Call the comprehensive service method.
+                // The service will handle all necessary validation (non-negativity for price/quantity, name/category validation from the existing product).
+                return inventoryService.updateProduct(productToUpdate);
+            }
+        } catch (Exception e) {
+            // Centralized exception handling
+            throw new RuntimeException("Controller failed to process product update: " + e.getMessage(), e);
+        }
     }
 
     public void deleteProduct(UUID productId) throws Exception {
