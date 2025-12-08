@@ -57,5 +57,10 @@ public class InventoryController {
         inventoryService.updateProductQuantity(productId, newQuantity);
     }
 
+    public void deleteProduct(UUID productId) throws Exception {
+        // Delegates the deletion request to the Service Layer
+        inventoryService.deleteProduct(productId);
+    }
+
     // يمكن إضافة دالات أخرى مثل updateProductDetails, deleteProduct...
 }

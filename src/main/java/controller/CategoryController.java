@@ -32,5 +32,11 @@ public class CategoryController {
         return categoryService.createCategory(new Category(name));
     }
 
+    public void deleteCategory(UUID categoryId) throws Exception {
+        if (categoryId == null) {
+            throw new IllegalArgumentException("Category ID must be provided for deletion.");
+        }
+        categoryService.deleteCategory(categoryId);
+    }
     // يمكن إضافة دالة deleteCategory لاحقاً
 }
