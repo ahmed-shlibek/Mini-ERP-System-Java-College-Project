@@ -7,7 +7,6 @@ public class OrderItem {
     private UUID productId;
     private long priceAtOrder;
     private int quantity;
-    private String productName;
 
     public OrderItem() {
 
@@ -16,11 +15,6 @@ public class OrderItem {
     public OrderItem(UUID orderId, UUID productId) {
         this.orderId = orderId;
         this.productId = productId;
-    }
-    public OrderItem(UUID orderId, String productName, int quantity){
-        this.orderId = orderId;
-        this.productName = productName;
-        this.quantity = quantity;
     }
 
     public OrderItem(UUID orderId, UUID productId, long priceAtOrder, int quantity) {
