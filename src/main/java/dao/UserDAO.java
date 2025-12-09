@@ -3,6 +3,7 @@ import main.java.model.User;
 
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,6 +19,8 @@ public interface UserDAO {
     Optional<User> findByUserName(String username) throws SQLException;
 
     Optional<User> findUserById(UUID id) throws SQLException;
+
+    List<User> findAll() throws SQLException;
 
     // this will update the user in the database
     User update(User user) throws SQLException;

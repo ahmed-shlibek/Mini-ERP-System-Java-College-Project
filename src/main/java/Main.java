@@ -3,6 +3,7 @@ package main.java;
 import main.java.controller.AuthController;
 import main.java.controller.CategoryController;
 import main.java.controller.InventoryController;
+import main.java.controller.UserController;
 import main.java.dao.*;
 import main.java.dao_impl.*;
 import main.java.service.CategoryService;
@@ -38,13 +39,14 @@ public class Main {
         AuthController authController = new AuthController(userService);
         CategoryController categoryController = new CategoryController(categoryService); // إنشاء متحكم الأصناف
         InventoryController inventoryController = new InventoryController(inventoryService, categoryService);
+        UserController userController = new UserController(userService);
 
         // يمكننا إضافة متحكم الطلبات هنا لاحقاً (OrderController)
 
         // ------------------ 4. بدء الواجهة الرسومية (UI) ------------------
 
         // تغيير دالة البناء لـ LoginFrame لتمرير CategoryController
-        LoginFrame loginFrame = new LoginFrame(authController, inventoryController, categoryController);
+        LoginFrame loginFrame = new LoginFrame(authController, inventoryController, categoryController, userController);
         loginFrame.setVisible(true);
     }
 }
