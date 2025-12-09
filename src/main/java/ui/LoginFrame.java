@@ -1,9 +1,6 @@
 package main.java.ui;
 
-import main.java.controller.AuthController;
-import main.java.controller.CategoryController; // استيراد متحكم الأصناف
-import main.java.controller.InventoryController;
-import main.java.controller.UserController;
+import main.java.controller.*;
 import main.java.database.DBConnection;
 import main.java.model.User;
 import main.java.util.SessionUtil;
@@ -23,6 +20,7 @@ public class LoginFrame extends JFrame {
     private final InventoryController inventoryController;
     private final CategoryController categoryController; // حفظ متحكم الأصناف
     private final UserController userController;
+    private final OrderController orderController;
 
     // مكونات الواجهة
     private JTextField usernameField;
@@ -31,11 +29,12 @@ public class LoginFrame extends JFrame {
 
     // دالة البناء تستقبل Controllers المطلوبة
     //our constructor
-    public LoginFrame(AuthController authController, InventoryController inventoryController, CategoryController categoryController, UserController userController) {
+    public LoginFrame(AuthController authController, InventoryController inventoryController, CategoryController categoryController, UserController userController, OrderController orderController) {
         this.authController = authController;
         this.inventoryController = inventoryController;
         this.categoryController = categoryController; // حقن التبعية
         this.userController = userController;
+        this.orderController = orderController;
 
         // إعدادات النافذة الرئيسية
         //we have these default settings for our pannel
@@ -116,7 +115,7 @@ public class LoginFrame extends JFrame {
                 dispose();
 
                 // عرض لوحة التحكم بمرور جميع Controllers المطلوبة
-                new DashboardFrame(inventoryController, categoryController, userController).setVisible(true);
+                new DashboardFrame(inventoryController, categoryController, userController,orderController).setVisible(true);
 
             }else{
                 JOptionPane.showMessageDialog(LoginFrame.this,
