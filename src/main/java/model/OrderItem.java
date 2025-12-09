@@ -7,6 +7,7 @@ public class OrderItem {
     private UUID productId;
     private long priceAtOrder;
     private int quantity;
+    private String productName;
 
     public OrderItem() {
 
@@ -15,6 +16,11 @@ public class OrderItem {
     public OrderItem(UUID orderId, UUID productId) {
         this.orderId = orderId;
         this.productId = productId;
+    }
+    public OrderItem(UUID orderId, String productName, int quantity){
+        this.orderId = orderId;
+        this.productName = productName;
+        this.quantity = quantity;
     }
 
     public OrderItem(UUID orderId, UUID productId, long priceAtOrder, int quantity) {
@@ -40,6 +46,11 @@ public class OrderItem {
         return quantity;
     }
 
+    //i added this m
+    public String getProductName() { // <--- 3. NEW GETTER
+        return productName;
+    }
+
     public void setOrderId(UUID orderId) {
         this.orderId = orderId;
     }
@@ -54,6 +65,10 @@ public class OrderItem {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public void setProductName(String productName) { // <--- 4. NEW SETTER
+        this.productName = productName;
     }
 
     @Override

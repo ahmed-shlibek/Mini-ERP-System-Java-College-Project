@@ -113,4 +113,12 @@ public class OrderService {
             throw e;
         }
     }
+
+    //added the two getters
+    public ProductDAO getProductDAO() {
+        return productDAO;
+    }
+    public OrderDAO getOrderDAO() {
+        return orderDAO;
+    }
 }
