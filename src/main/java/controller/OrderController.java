@@ -47,7 +47,7 @@ public class OrderController {
     // --- Data Retrieval Methods (for UI Tables) ---
     // -------------------------------------------------------------------
 
-    public List<ProductStub> getAvailableProducts() {
+    public List<Product> getAvailableProducts() {
         try {
             // Access the DAO via the service (assuming the getter was added to OrderService)
             ProductDAO productDAO = orderService.getProductDAO();
