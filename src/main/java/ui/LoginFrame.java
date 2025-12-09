@@ -3,6 +3,7 @@ package main.java.ui;
 import main.java.controller.AuthController;
 import main.java.controller.CategoryController; // استيراد متحكم الأصناف
 import main.java.controller.InventoryController;
+import main.java.controller.UserController;
 import main.java.database.DBConnection;
 import main.java.model.User;
 import main.java.util.SessionUtil;
@@ -21,6 +22,7 @@ public class LoginFrame extends JFrame {
     private final AuthController authController;
     private final InventoryController inventoryController;
     private final CategoryController categoryController; // حفظ متحكم الأصناف
+    private final UserController userController;
 
     // مكونات الواجهة
     private JTextField usernameField;
@@ -29,10 +31,11 @@ public class LoginFrame extends JFrame {
 
     // دالة البناء تستقبل Controllers المطلوبة
     //our constructor
-    public LoginFrame(AuthController authController, InventoryController inventoryController, CategoryController categoryController) {
+    public LoginFrame(AuthController authController, InventoryController inventoryController, CategoryController categoryController, UserController userController) {
         this.authController = authController;
         this.inventoryController = inventoryController;
         this.categoryController = categoryController; // حقن التبعية
+        this.userController = userController;
 
         // إعدادات النافذة الرئيسية
         //we have these default settings for our pannel
@@ -113,7 +116,7 @@ public class LoginFrame extends JFrame {
                 dispose();
 
                 // عرض لوحة التحكم بمرور جميع Controllers المطلوبة
-                new DashboardFrame(inventoryController, categoryController).setVisible(true);
+                new DashboardFrame(inventoryController, categoryController, userController).setVisible(true);
 
             }else{
                 JOptionPane.showMessageDialog(LoginFrame.this,

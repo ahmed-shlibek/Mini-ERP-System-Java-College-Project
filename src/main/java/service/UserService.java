@@ -5,6 +5,7 @@ import main.java.dao.UserDAO;
 import main.java.model.User;
 import main.java.util.SecurityUtil;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -91,6 +92,14 @@ public class UserService {
         }
     }
 
+    public List<User> getAllUsers() {
+        try {
+            return userDAO.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error occurred while getting users", e);
+        }
+    }
+
     public User updateUser(User user) {
         if(user == null) {
             throw new IllegalArgumentException("User cannot be null");
@@ -120,6 +129,7 @@ public class UserService {
                     throw new IllegalArgumentException("Username '" + user.getUsername() + "' is already taken by another user.");
                 }
             }
+            user.setPassword(SecurityUtil.hashPassword(user.getPassword()));
 
             return userDAO.update(user);
 

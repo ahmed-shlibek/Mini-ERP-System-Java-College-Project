@@ -2,6 +2,7 @@ package main.java.ui;
 
 import main.java.controller.CategoryController; // استيراد متحكم الأصناف
 import main.java.controller.InventoryController;
+import main.java.controller.UserController;
 import main.java.util.SessionUtil;
 import javax.swing.*;
 import java.awt.*;
@@ -16,10 +17,12 @@ public class DashboardFrame extends JFrame {
 
     private final InventoryController inventoryController;
     private final CategoryController categoryController; // حفظ متحكم الأصناف
+    private final UserController userController;
 
-    public DashboardFrame(InventoryController inventoryController, CategoryController categoryController) {
+    public DashboardFrame(InventoryController inventoryController, CategoryController categoryController,  UserController userController) {
         this.inventoryController = inventoryController;
         this.categoryController = categoryController; // حقن التبعية
+        this.userController = userController;
 
         // إعدادات النافذة
         setTitle("Main Dash Board - Welcome" + SessionUtil.getCurrentUser().getUsername());
@@ -54,8 +57,10 @@ public class DashboardFrame extends JFrame {
 
         // 3. لوحة المستخدمين (للأدمين فقط - وهمية حالياً)
         if ("ADMIN".equalsIgnoreCase(SessionUtil.getCurrentUser().getRole())) {
-            JPanel userPanel = new JPanel();
-            userPanel.add(new JLabel("شاشة إدارة المستخدمين قريباً..."));
+//            JPanel userPanel = new JPanel();
+//            userPanel.add(new JLabel("شاشة إدارة المستخدمين قريباً..."));
+//            tabbedPane.addTab("User Management", userPanel);
+            UserPanel userPanel = new UserPanel(userController);
             tabbedPane.addTab("User Management", userPanel);
         }
 

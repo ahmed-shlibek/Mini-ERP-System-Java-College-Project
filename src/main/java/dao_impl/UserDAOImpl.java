@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +18,7 @@ public class UserDAOImpl implements UserDAO {
     private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password, role) VALUES (?, ?, ?, ?)";
     private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password, role FROM users WHERE username = ?";
     private static final String FIND_BY_ID_SQL = "SELECT user_id, username, password, role FROM users WHERE user_id = ?";
+    private static final String FIND_ALL_SQL = "SELECT user_id, username, password, role FROM users";
     private static final String UPDATE_USER_SQL = "UPDATE users SET username = ?, password =? , role = ? WHERE user_id = ?";
     private static final String DELETE_BY_USER_ID_SQL ="DELETE FROM users WHERE user_id =?";
 
@@ -118,6 +121,7 @@ public class UserDAOImpl implements UserDAO {
         }
     }
 
+    @Override
     public Optional<User> findUserById(UUID id) throws SQLException {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(FIND_BY_ID_SQL)) {
@@ -130,6 +134,23 @@ public class UserDAOImpl implements UserDAO {
                 }
                 return Optional.empty();
             }
+        }
+    }
+
+    @Override
+    public List<User> findAll() throws SQLException {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_ALL_SQL)) {
+            List<User> users = new ArrayList<>();
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    User user = mapResultSetToUser(rs);
+                    users.add(user);
+                }
+            }
+
+            return users;
         }
     }
 
