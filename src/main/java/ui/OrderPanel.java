@@ -315,7 +315,7 @@ public class OrderPanel extends JPanel {
 
             for (OrderItem item : selectedOrder.get()) {
                 details.append(String.format("- %s (Qty: %d) @ %s each\n",
-                        item.getProductName(),
+                        item.getOrderId(),
                         item.getQuantity(),
                         String.format("$%.2f", item.getPriceAtOrder() / 100.0)
                 ));

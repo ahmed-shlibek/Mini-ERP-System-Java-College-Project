@@ -46,10 +46,6 @@ public class OrderItem {
         return quantity;
     }
 
-    //i added this m
-    public String getProductName() { // <--- 3. NEW GETTER
-        return productName;
-    }
 
     public void setOrderId(UUID orderId) {
         this.orderId = orderId;
@@ -67,9 +63,7 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
-    public void setProductName(String productName) { // <--- 4. NEW SETTER
-        this.productName = productName;
-    }
+
 
     @Override
     public String toString() {
