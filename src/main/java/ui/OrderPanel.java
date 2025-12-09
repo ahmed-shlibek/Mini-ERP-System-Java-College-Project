@@ -197,8 +197,7 @@ public class OrderPanel extends JPanel {
             if(!itemFound){
                 OrderItem item = new OrderItem(
                         selectedProduct.getProductId(),
-                        selectedProduct.getName(),
-                        quantity);
+                        selectedProduct.);
                 currentCart.add(item);
             }
             updateCartTable();
@@ -315,7 +314,7 @@ public class OrderPanel extends JPanel {
 
             for (OrderItem item : selectedOrder.get()) {
                 details.append(String.format("- %s (Qty: %d) @ %s each\n",
-                        item.getOrderId(),
+                        item.getOrderId().toString(),
                         item.getQuantity(),
                         String.format("$%.2f", item.getPriceAtOrder() / 100.0)
                 ));
@@ -355,8 +354,28 @@ public class OrderPanel extends JPanel {
         }
         }
 
-        private void updateCartTable() {
+    private void updateCartTable() {
+        cartTableModel.setRowCount(0); // Clear existing data
+        long currentTotal = 0;
+
+        for (OrderItem item : currentCart) {
+            // Find current product info for display price (if available)
+            Optional<Product> productOpt = availableProducts.stream()
+                    .filter(p -> p.getProductId().equals(item.getProductId()))
+                    .findFirst();
+
+            // Use the current price from the product cache for estimated cart display
+            long unitPrice = productOpt.isPresent() ? productOpt.get().getPrice() : 0;
+            cartTableModel.addRow(new Object[]{
+                    item.getQuantity(),
+                    String.format("$%.2f", unitPrice / 100.0),
+                    String.format("$%.2f", (unitPrice * item.getQuantity()) / 100.0)
+            });
+            currentTotal += (unitPrice * item.getQuantity());
         }
+
+        totalLabel.setText(String.format("Total: $%.2f", currentTotal / 100.0));
+    }
 
     }
 
