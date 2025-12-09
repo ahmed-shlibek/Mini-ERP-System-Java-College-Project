@@ -22,8 +22,8 @@ public class Main {
         UserDAO userDAO = new UserDAOImpl();
         CategoryDAO categoryDAO = new CategoryDAOImpl();
         ProductDAO productDAO = new ProductDAOImpl();
-        OrderDAO orderDAO = new OrderDAOImpl();
         OrderItemDAO orderItemDAO = new OrderItemDAOImpl();
+        OrderDAO orderDAO = new OrderDAOImpl(orderItemDAO);
 
         // ------------------ 2. تهيئة طبقة منطق الأعمال (Service) ------------------
         UserService userService = new UserService(userDAO);
@@ -44,7 +44,7 @@ public class Main {
         // ------------------ 4. بدء الواجهة الرسومية (UI) ------------------
 
         // تغيير دالة البناء لـ LoginFrame لتمرير CategoryController
-        LoginFrame loginFrame = new LoginFrame(authController, inventoryController, categoryController, userController,orderController );
+        LoginFrame loginFrame = new LoginFrame(authController, inventoryController, categoryController, userController, orderController);
         loginFrame.setVisible(true);
     }
 }

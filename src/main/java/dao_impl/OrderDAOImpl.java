@@ -1,6 +1,7 @@
 package main.java.dao_impl;
 
 import main.java.dao.OrderDAO;
+import main.java.dao.OrderItemDAO;
 import main.java.database.DBConnection;
 import main.java.model.Order;
 import java.nio.ByteBuffer;
@@ -20,6 +21,13 @@ public class OrderDAOImpl implements OrderDAO {
     private static final String SELECT_ALL_SQL = "SELECT order_id, user_id,status ,created_at FROM orders";
     private static final String UPDATE_SQL = "UPDATE orders SET status = ? WHERE order_id = ?";
     private static final String DELETE_SQL = "DELETE FROM orders WHERE order_id = ?";
+    private static final String SELECT_ITEMS_BY_ORDER_ID_SQL = "SELECT order_id, product_id, price_at_order, quantity FROM order_items WHERE order_id = ?";
+
+    private final OrderItemDAO orderItemDAO;
+
+    public OrderDAOImpl(OrderItemDAO orderItemDAO) {
+        this.orderItemDAO = orderItemDAO;
+    }
 
     private byte[] uuidToBytes(UUID uuid) {
         if (uuid == null) {
@@ -81,6 +89,7 @@ public class OrderDAOImpl implements OrderDAO {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     Order order = mapResultSetToOrder(rs);
+                    order.setOrderItems(orderItemDAO.findByOrderId(orderId));
                     return Optional.of(order);
                 }
             }
@@ -100,6 +109,7 @@ public class OrderDAOImpl implements OrderDAO {
 
             while (rs.next()) {
                 Order order = mapResultSetToOrder(rs);
+                order.setOrderItems(orderItemDAO.findByOrderId(order.getOrderId()));
                 orders.add(order);
             }
 
@@ -122,6 +132,7 @@ public class OrderDAOImpl implements OrderDAO {
 
             while (rs.next()) {
                 Order order = mapResultSetToOrder(rs);
+                order.setOrderItems(orderItemDAO.findByOrderId(order.getOrderId()));
                 orders.add(order);
             }
         }
@@ -140,6 +151,7 @@ public class OrderDAOImpl implements OrderDAO {
 
             while (rs.next()) {
                 Order order = mapResultSetToOrder(rs);
+                order.setOrderItems(orderItemDAO.findByOrderId(order.getOrderId()));
                 orders.add(order);
             }
         }

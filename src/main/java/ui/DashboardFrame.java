@@ -19,13 +19,13 @@ public class DashboardFrame extends JFrame {
     private final InventoryController inventoryController;
     private final CategoryController categoryController; // حفظ متحكم الأصناف
     private final UserController userController;
-    private final OrderController OrderController;
+    private final OrderController orderController;
 
-    public DashboardFrame(InventoryController inventoryController, CategoryController categoryController, UserController userController, OrderController orderController) {
+    public DashboardFrame(InventoryController inventoryController, CategoryController categoryController,  UserController userController,  OrderController orderController) {
         this.inventoryController = inventoryController;
         this.categoryController = categoryController; // حقن التبعية
         this.userController = userController;
-        OrderController = orderController;
+        this.orderController = orderController;
 
         // إعدادات النافذة
         setTitle("Main Dash Board - Welcome" + SessionUtil.getCurrentUser().getUsername());
@@ -54,15 +54,11 @@ public class DashboardFrame extends JFrame {
         tabbedPane.addTab("Product Management", productPanel);
 
         // 2. لوحة الطلبات (وهمية حالياً)
-        JPanel ordersPanel = new JPanel();
-        OrderPanel orderPanel = new OrderPanel(OrderController);
-        tabbedPane.addTab("Order Management", ordersPanel);
+        OrderPanel orderPanel = new OrderPanel(orderController, inventoryController);
+        tabbedPane.addTab("Order Management", orderPanel);
 
         // 3. لوحة المستخدمين (للأدمين فقط - وهمية حالياً)
         if ("ADMIN".equalsIgnoreCase(SessionUtil.getCurrentUser().getRole())) {
-//            JPanel userPanel = new JPanel();
-//            userPanel.add(new JLabel("شاشة إدارة المستخدمين قريباً..."));
-//            tabbedPane.addTab("User Management", userPanel);
             UserPanel userPanel = new UserPanel(userController);
             tabbedPane.addTab("User Management", userPanel);
         }

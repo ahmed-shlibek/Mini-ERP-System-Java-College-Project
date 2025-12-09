@@ -1,6 +1,10 @@
 package main.java.model;
 
+import main.java.dao.OrderDAO;
+import main.java.dao.OrderItemDAO;
+
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class Order {
@@ -8,6 +12,7 @@ public class Order {
     private UUID userId;
     private String status;
     private LocalDateTime createdAt;
+    private List<OrderItem> orderItems;
 
     // default constructor
     public Order() {
@@ -28,6 +33,15 @@ public class Order {
         this.createdAt = createdAt;
     }
 
+    // domain constructor
+    public Order(UUID orderId, UUID userId, String status, LocalDateTime createdAt,  List<OrderItem> items) {
+        this.orderId = orderId;
+        this.userId = userId;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.orderItems = items;
+    }
+
     // getter functions
     public UUID getUserId() {
         return userId;
@@ -45,6 +59,10 @@ public class Order {
         return createdAt;
     }
 
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
+    }
+
     // setter functions
     public void setOrderId(UUID orderId) {
         this.orderId = orderId;
@@ -60,6 +78,18 @@ public class Order {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = orderItems;
+    }
+
+    public double getTotal() {
+        double total = 0;
+        for (OrderItem orderItem : orderItems) {
+            total += orderItem.getPriceAtOrder() * orderItem.getQuantity();
+        }
+        return total;
     }
 
     @Override

@@ -12,11 +12,6 @@ public class OrderItem {
 
     }
 
-    public OrderItem(UUID orderId, UUID productId) {
-        this.orderId = orderId;
-        this.productId = productId;
-    }
-
     public OrderItem(UUID orderId, UUID productId, long priceAtOrder, int quantity) {
         this.orderId = orderId;
         this.productId = productId;

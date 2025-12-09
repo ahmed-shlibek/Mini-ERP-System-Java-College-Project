@@ -115,7 +115,7 @@ public class LoginFrame extends JFrame {
                 dispose();
 
                 // عرض لوحة التحكم بمرور جميع Controllers المطلوبة
-                new DashboardFrame(inventoryController, categoryController, userController,orderController).setVisible(true);
+                new DashboardFrame(inventoryController, categoryController, userController, orderController).setVisible(true);
 
             }else{
                 JOptionPane.showMessageDialog(LoginFrame.this,
