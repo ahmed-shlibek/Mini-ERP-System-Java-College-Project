@@ -3,6 +3,9 @@ package main.java.dao_impl;
 import main.java.dao.ProductDAO;
 import main.java.database.DBConnection;
 import main.java.model.Product;
+import main.java.util.DaoUtil;
+import main.java.util.ResultSetMapper;
+
 import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ProductDAOImpl implements ProductDAO {
+public class ProductDAOImpl implements ProductDAO, ResultSetMapper<Product> {
 
     private static final String INSERT_PRODUCT_SQL = "INSERT INTO products (product_id , name ,category_id, price,quantity ) VALUES (?,?,?,?,?)";
     private static final String UPDATE_PRODUCT_SQL = "UPDATE products SET name = ?, category_id = ?, price = ? ,quantity =? WHERE product_id= ?";
@@ -24,44 +27,13 @@ public class ProductDAOImpl implements ProductDAO {
     private static final String FIND_LOW_STOCK_SQL = "SELECT * FROM products WHERE quantity < ?";
     private static final String UPDATE_STOCK_SQL = "UPDATE products SET quantity = quantity + ? WHERE product_id = ?";
 
-
-    //uuid object to 16 byte
-    private byte[] uuidToByte(UUID uuid){
-        if (uuid == null) {
-        return null;
-        }
-
-        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-
-        //for each 8bytes allocate 64 so one has most sig and one has least sig to make 16 byte (128)
-        bb.putLong(uuid.getMostSignificantBits());
-        bb.putLong(uuid.getLeastSignificantBits());
-
-        return bb.array();
-
-    }
-
-    private UUID byteToUUID(byte[] bytes){
-        if(bytes == null || bytes.length <16){
-            return null;
-        }
-
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-
-        long firstLong = bb.getLong();
-        long secondLong = bb.getLong();
-        //reutrns our uuid after we it from byte form
-        return new UUID(firstLong , secondLong);
-    }
-
-    private Product mapResultSetToProduct (ResultSet rs)throws SQLException{
+    @Override
+    public Product map(ResultSet rs) throws SQLException {
         byte[] pidBytes = rs.getBytes("product_id");
-        //basically got the product id from the database and then changed it to our uuid
-        UUID productId = byteToUUID(pidBytes);
+        UUID productId = DaoUtil.bytesToUUID(pidBytes);
 
-        //also had to convert the category id
         byte[] cidBytes = rs.getBytes("category_id");
-        UUID categoryId = byteToUUID(cidBytes);
+        UUID categoryId = DaoUtil.bytesToUUID(cidBytes);
 
         String name = rs.getString("name");
         long price = rs.getLong("price");
@@ -85,8 +57,8 @@ public class ProductDAOImpl implements ProductDAO {
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(INSERT_PRODUCT_SQL)) {
 
-            byte[] productIdBytes = uuidToByte(product.getProductId());
-            byte[] categoryIdBytes = uuidToByte(product.getCategoryId());
+            byte[] productIdBytes = DaoUtil.uuidToBytes(product.getProductId());
+            byte[] categoryIdBytes = DaoUtil.uuidToBytes(product.getCategoryId());
 
             ps.setBytes(1,productIdBytes);
             ps.setString(2,product.getName());
@@ -108,10 +80,10 @@ public class ProductDAOImpl implements ProductDAO {
         PreparedStatement ps = conn.prepareStatement(UPDATE_PRODUCT_SQL)){
 
             ps.setString(1,product.getName());
-            ps.setBytes(2,uuidToByte(product.getCategoryId()));
+            ps.setBytes(2,DaoUtil.uuidToBytes(product.getCategoryId()));
             ps.setLong(3,product.getPrice());
             ps.setInt(4,product.getQuantity());
-            ps.setBytes(5,uuidToByte(product.getProductId()));
+            ps.setBytes(5,DaoUtil.uuidToBytes(product.getProductId()));
 
             ps.executeUpdate();
         }
@@ -126,7 +98,7 @@ public class ProductDAOImpl implements ProductDAO {
 
             stmt.setInt(1, quantityChange);
 
-            stmt.setBytes(2, uuidToByte(productId));
+            stmt.setBytes(2, DaoUtil.uuidToBytes(productId));
 
             stmt.executeUpdate();
 
@@ -139,7 +111,7 @@ public class ProductDAOImpl implements ProductDAO {
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(DELETE_PRODUCT_SQL)){
 
-            ps.setBytes(1,uuidToByte(productId));
+            ps.setBytes(1,DaoUtil.uuidToBytes(productId));
             ps.executeUpdate();
         }
     }
@@ -150,14 +122,14 @@ public class ProductDAOImpl implements ProductDAO {
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(FIND_BY_PRODUCTID_SQL)){
 
-            ps.setBytes(1,uuidToByte(productId));
+            ps.setBytes(1,DaoUtil.uuidToBytes(productId));
 
             try(ResultSet rs = ps.executeQuery()){
 
                 if(rs.next()){
                     //the mapper function translates our data into objects (basically a language that java
                     //understands it
-                    Product product = mapResultSetToProduct(rs);
+                    Product product = map(rs);
 
                     //we use optional cuz it might return and might not so basically optional
                     return Optional.of(product);
@@ -181,7 +153,7 @@ public class ProductDAOImpl implements ProductDAO {
 
                 if (rs.next()) {
 
-                    Product product = mapResultSetToProduct(rs);
+                    Product product = map(rs);
                     return Optional.of(product);
 
                 }
@@ -205,7 +177,7 @@ public class ProductDAOImpl implements ProductDAO {
                 while(rs.next()){
 
                     //translate using mapper
-                    Product product = mapResultSetToProduct(rs);
+                    Product product = map(rs);
                     //add each product into our array list
                     allProducts.add(product);
 
@@ -234,7 +206,7 @@ public class ProductDAOImpl implements ProductDAO {
 
                 while(rs.next()){
 
-                    Product product = mapResultSetToProduct(rs);
+                    Product product = map(rs);
                     // here it looks for all the
                     lowStockProducts.add(product);
                 }

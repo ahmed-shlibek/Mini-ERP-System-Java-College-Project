@@ -3,6 +3,8 @@ package main.java.dao_impl;
 import main.java.dao.OrderItemDAO;
 import main.java.database.DBConnection;
 import main.java.model.OrderItem;
+import main.java.util.DaoUtil;
+import main.java.util.ResultSetMapper;
 
 import java.nio.ByteBuffer;
 import java.sql.*;
@@ -10,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class OrderItemDAOImpl implements OrderItemDAO {
+public class OrderItemDAOImpl implements OrderItemDAO, ResultSetMapper<OrderItem> {
 
     private static final String INSERT_SQL = "INSERT INTO order_items (order_id, product_id, price_at_order, quantity) VALUES (?, ?, ?, ?)";
     private static final String SELECT_BY_ORDER_ID_SQL = "SELECT order_id, product_id, price_at_order, quantity FROM order_items WHERE order_id = ?";
@@ -18,33 +20,12 @@ public class OrderItemDAOImpl implements OrderItemDAO {
     private static final String DELETE_BY_ORDER_ID_SQL = "DELETE FROM order_items WHERE order_id = ?";
     private static final String DELETE_BY_KEYS_SQL = "DELETE FROM order_items WHERE order_id = ? AND product_id = ?";
 
-
-
-    private byte[] uuidToBytes(UUID uuid) {
-        if (uuid == null) {
-            return null;
-        }
-        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-        bb.putLong(uuid.getMostSignificantBits());
-        bb.putLong(uuid.getLeastSignificantBits());
-        return bb.array();
-    }
-
-    private UUID bytesToUUID(byte[] bytes) {
-        if (bytes == null || bytes.length < 16) {
-            return null;
-        }
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        long firstLong = bb.getLong();
-        long secondLong = bb.getLong();
-        return new UUID(firstLong, secondLong);
-    }
-
-    private OrderItem mapResultSetToOrderItem(ResultSet rs) throws SQLException {
+    @Override
+    public OrderItem map(ResultSet rs) throws SQLException {
         byte[] orderIdBytes = rs.getBytes("order_id");
-        UUID orderId = bytesToUUID(orderIdBytes);
+        UUID orderId = DaoUtil.bytesToUUID(orderIdBytes);
         byte[] productIdBytes = rs.getBytes("product_id");
-        UUID productId = bytesToUUID(productIdBytes);
+        UUID productId = DaoUtil.bytesToUUID(productIdBytes);
         long priceAtOrder = rs.getLong("price_at_order");
         int quantity = rs.getInt("quantity");
         return new OrderItem(orderId, productId, priceAtOrder, quantity);
@@ -64,8 +45,8 @@ public class OrderItemDAOImpl implements OrderItemDAO {
                         continue;
                     }
 
-                    stmt.setBytes(1, uuidToBytes(item.getOrderId()));
-                    stmt.setBytes(2, uuidToBytes(item.getProductId()));
+                    stmt.setBytes(1, DaoUtil.uuidToBytes(item.getOrderId()));
+                    stmt.setBytes(2, DaoUtil.uuidToBytes(item.getProductId()));
                     stmt.setLong(3, item.getPriceAtOrder());
                     stmt.setInt(4, item.getQuantity());
 
@@ -102,10 +83,10 @@ public class OrderItemDAOImpl implements OrderItemDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(SELECT_BY_ORDER_ID_SQL)) {
 
-            stmt.setBytes(1, uuidToBytes(orderId));
+            stmt.setBytes(1, DaoUtil.uuidToBytes(orderId));
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    OrderItem item = mapResultSetToOrderItem(rs);
+                    OrderItem item = map(rs);
                     orderItems.add(item);
                 }
             }
@@ -120,8 +101,8 @@ public class OrderItemDAOImpl implements OrderItemDAO {
 
             stmt.setLong(1, orderItem.getPriceAtOrder());
             stmt.setInt(2, orderItem.getQuantity());
-            stmt.setBytes(3, uuidToBytes(orderItem.getOrderId()));
-            stmt.setBytes(4, uuidToBytes(orderItem.getProductId()));
+            stmt.setBytes(3, DaoUtil.uuidToBytes(orderItem.getOrderId()));
+            stmt.setBytes(4, DaoUtil.uuidToBytes(orderItem.getProductId()));
 
             stmt.executeUpdate();
         }
@@ -134,7 +115,7 @@ public class OrderItemDAOImpl implements OrderItemDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(DELETE_BY_ORDER_ID_SQL)) {
 
-            stmt.setBytes(1, uuidToBytes(orderId));
+            stmt.setBytes(1, DaoUtil.uuidToBytes(orderId));
 
             stmt.executeUpdate();
         }
@@ -145,8 +126,8 @@ public class OrderItemDAOImpl implements OrderItemDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(DELETE_BY_KEYS_SQL)) {
 
-            stmt.setBytes(1, uuidToBytes(orderId));
-            stmt.setBytes(2, uuidToBytes(productId));
+            stmt.setBytes(1, DaoUtil.uuidToBytes(orderId));
+            stmt.setBytes(2, DaoUtil.uuidToBytes(productId));
 
             stmt.executeUpdate();
         }

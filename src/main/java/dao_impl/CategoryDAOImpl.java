@@ -3,6 +3,8 @@ package main.java.dao_impl;
 import main.java.dao.CategoryDAO;
 import main.java.model.Category;
 import main.java.database.DBConnection;
+import main.java.util.DaoUtil;
+import main.java.util.ResultSetMapper;
 
 import java.nio.ByteBuffer;
 import java.sql.*;
@@ -12,7 +14,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
-public class CategoryDAOImpl implements CategoryDAO {
+public class CategoryDAOImpl implements CategoryDAO, ResultSetMapper<Category> {
 
     private static final String INSERT_CATEGORY_SQL = "INSERT INTO categories (category_id, name) VALUES (?, ?)";
     private static final String SELECT_BY_ID_SQL = "SELECT category_id, name, created_at FROM categories WHERE category_id = ?";
@@ -20,29 +22,10 @@ public class CategoryDAOImpl implements CategoryDAO {
     private static final String SELECT_ALL_SQL = "SELECT category_id, name, created_at FROM categories";
     private static final String DELETE_SQL = "DELETE FROM categories WHERE category_id = ?";
 
-    private byte[] uuidToBytes(UUID uuid) {
-        if (uuid == null) {
-            return null;
-        }
-        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-        bb.putLong(uuid.getMostSignificantBits());
-        bb.putLong(uuid.getLeastSignificantBits());
-        return bb.array();
-    }
-
-    private UUID bytesToUUID(byte[] bytes) {
-        if (bytes == null || bytes.length < 16) {
-            return null;
-        }
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        long firstLong = bb.getLong();
-        long secondLong = bb.getLong();
-        return new UUID(firstLong, secondLong);
-    }
-
-    private Category mapResultSetToCategory(ResultSet rs) throws SQLException {
+    @Override
+    public Category map(ResultSet rs) throws SQLException {
         byte[] idBytes = rs.getBytes("category_id");
-        UUID categoryId = bytesToUUID(idBytes);
+        UUID categoryId = DaoUtil.bytesToUUID(idBytes);
         String name = rs.getString("name");
         Timestamp timestamp = rs.getTimestamp("created_at");
         LocalDateTime createdAt = timestamp != null ? timestamp.toLocalDateTime() : null;
@@ -56,7 +39,7 @@ public class CategoryDAOImpl implements CategoryDAO {
         }
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(INSERT_CATEGORY_SQL)) {
-            byte[] idBytes = uuidToBytes(category.getCategoryId());
+            byte[] idBytes = DaoUtil.uuidToBytes(category.getCategoryId());
             stmt.setBytes(1, idBytes);
             stmt.setString(2, category.getName());
             stmt.executeUpdate();
@@ -69,10 +52,10 @@ public class CategoryDAOImpl implements CategoryDAO {
     public Optional<Category> findById(UUID uuid) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(SELECT_BY_ID_SQL)) {
-            stmt.setBytes(1, uuidToBytes(uuid));
+            stmt.setBytes(1, DaoUtil.uuidToBytes(uuid));
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    Category category = mapResultSetToCategory(rs);
+                    Category category = map(rs);
                     return Optional.of(category);
                 }
                 return Optional.empty();
@@ -87,7 +70,7 @@ public class CategoryDAOImpl implements CategoryDAO {
             stmt.setString(1, name);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    Category category = mapResultSetToCategory(rs);
+                    Category category = map(rs);
                     return Optional.of(category);
                 }
                 return Optional.empty();
@@ -102,7 +85,7 @@ public class CategoryDAOImpl implements CategoryDAO {
              PreparedStatement stmt = con.prepareStatement(SELECT_ALL_SQL);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                Category category = mapResultSetToCategory(rs);
+                Category category = map(rs);
                 categories.add(category);
             }
         }
@@ -114,7 +97,7 @@ public class CategoryDAOImpl implements CategoryDAO {
     public void delete(UUID uuid) throws SQLException {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement stmt = con.prepareStatement(DELETE_SQL)) {
-            stmt.setBytes(1, uuidToBytes(uuid));
+            stmt.setBytes(1, DaoUtil.uuidToBytes(uuid));
             stmt.executeUpdate();
         }
     }

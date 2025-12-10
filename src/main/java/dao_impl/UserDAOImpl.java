@@ -3,6 +3,9 @@ package main.java.dao_impl;
 import main.java.dao.UserDAO;
 import main.java.database.DBConnection;
 import main.java.model.User;
+import main.java.util.DaoUtil;
+import main.java.util.ResultSetMapper;
+
 import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class UserDAOImpl implements UserDAO {
+public class UserDAOImpl implements UserDAO, ResultSetMapper<User> {
 
     private static final String INSERT_USER_SQL = "INSERT INTO users (user_id, username, password, role) VALUES (?, ?, ?, ?)";
     private static final String FIND_BY_USERNAME_SQL = "SELECT user_id, username, password, role FROM users WHERE username = ?";
@@ -22,58 +25,24 @@ public class UserDAOImpl implements UserDAO {
     private static final String UPDATE_USER_SQL = "UPDATE users SET username = ?, password =? , role = ? WHERE user_id = ?";
     private static final String DELETE_BY_USER_ID_SQL ="DELETE FROM users WHERE user_id =?";
 
-    //this will convert a uuid object(128 bits) to 16byte for efficency
-    //return type : byte[]
-    //takes in a uuid type
-    private byte[] uuidToBytes(UUID uuid){
-        if(uuid == null){
-            return null;
-        }
-        //allocates 16 bytes for the uuid
-        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-
-        //this basicaly gets us two 64 bits of the 128 -- 64 for msb and 64 lsb
-        bb.putLong(uuid.getMostSignificantBits());
-        bb.putLong(uuid.getLeastSignificantBits());
-
-        //we dont have to write return bb.byte[] cuz we already declared it
-        return bb.array();
-    }
-
-    //from the 16 byte to original 128
-    //return type: UUID
-    // takes in byte[] type
-    private UUID bytesToUUID(byte[] bytes){
-        if (bytes == null || bytes.length < 16){
-            return null;
-        }
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-
-        long firstLong = bb.getLong();
-        long secondLong = bb.getLong();
-
-        return new UUID(firstLong , secondLong);
-    }
-
-    //we have this method to basically translate from oop to relation sql
-    private User mapResultSetToUser(ResultSet rs)throws SQLException {
+    @Override
+    public User map(ResultSet rs) throws SQLException {
         byte[] idBytes = rs.getBytes("user_id");
-        UUID userId = bytesToUUID(idBytes);
-        //retrieve the rest
-         String username = rs.getString("username");
-         String role = rs.getString("role");
-         String password = rs.getString("password");
+        UUID userId = DaoUtil.bytesToUUID(idBytes);
 
-         //we are populating so basically filling in
-         User user = new User();
-         user.setUserID(userId);
-         user.setRole(role);
-         user.setPassword(password);
-         user.setUsername(username);
+        String username = rs.getString("username");
+        String role = rs.getString("role");
+        String password = rs.getString("password");
 
-         return user;
+
+        User user = new User();
+        user.setUserID(userId);
+        user.setRole(role);
+        user.setPassword(password);
+        user.setUsername(username);
+
+        return user;
     }
-
 
     @Override
     public User save(User user) throws SQLException{
@@ -83,7 +52,7 @@ public class UserDAOImpl implements UserDAO {
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(INSERT_USER_SQL)) {
 
-        byte[] userIdBytes = uuidToBytes(user.getUserId());
+        byte[] userIdBytes = DaoUtil.uuidToBytes(user.getUserId());
 
         //the numbers are placeholders for the ? in sql query
         //ps.setString sends the value with a placeholder to our database
@@ -111,7 +80,7 @@ public class UserDAOImpl implements UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 //made result set querry then we see if anything returned if yes make the data row into a java object
                 if (rs.next()) {
-                    User user = mapResultSetToUser(rs);
+                    User user = map(rs);
                     //return it
                     return Optional.of(user);
                 }
@@ -125,11 +94,11 @@ public class UserDAOImpl implements UserDAO {
     public Optional<User> findUserById(UUID id) throws SQLException {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(FIND_BY_ID_SQL)) {
-            stmt.setBytes(1, uuidToBytes(id));
+            stmt.setBytes(1, DaoUtil.uuidToBytes(id));
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    User user = mapResultSetToUser(rs);
+                    User user = map(rs);
                     return Optional.of(user);
                 }
                 return Optional.empty();
@@ -145,7 +114,7 @@ public class UserDAOImpl implements UserDAO {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    User user = mapResultSetToUser(rs);
+                    User user = map(rs);
                     users.add(user);
                 }
             }
@@ -161,8 +130,8 @@ public class UserDAOImpl implements UserDAO {
             //we got the service layer to update these fields
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
-            ps.setString(3,user.getRole());
-            ps.setBytes(4,uuidToBytes(user.getUserId()));
+            ps.setString(3, user.getRole());
+            ps.setBytes(4, DaoUtil.uuidToBytes(user.getUserId()));
 
             //when we executed the update we got the whole ps to go the the sql to be executed
             //we called it and then it reutrns a number if 1 that means all goof if anything else then error
@@ -178,7 +147,7 @@ public class UserDAOImpl implements UserDAO {
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(DELETE_BY_USER_ID_SQL)){
 
-            ps.setBytes(1,uuidToBytes(userId));
+            ps.setBytes(1, DaoUtil.uuidToBytes(userId));
 
             ps.executeUpdate();
         }

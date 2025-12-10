@@ -4,6 +4,9 @@ import main.java.dao.OrderDAO;
 import main.java.dao.OrderItemDAO;
 import main.java.database.DBConnection;
 import main.java.model.Order;
+import main.java.util.DaoUtil;
+import main.java.util.ResultSetMapper;
+
 import java.nio.ByteBuffer;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -12,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class OrderDAOImpl implements OrderDAO {
+public class OrderDAOImpl implements OrderDAO, ResultSetMapper<Order> {
 
     private static final String INSERT_ORDER_SQL = "INSERT INTO orders(order_id, user_id) VALUES (?, ?)";
     private static final String SELECT_BY_ORDER_ID_SQL = "SELECT order_id, user_id,status ,created_at FROM orders WHERE order_id = ?";
@@ -29,31 +32,12 @@ public class OrderDAOImpl implements OrderDAO {
         this.orderItemDAO = orderItemDAO;
     }
 
-    private byte[] uuidToBytes(UUID uuid) {
-        if (uuid == null) {
-            return null;
-        }
-        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-        bb.putLong(uuid.getMostSignificantBits());
-        bb.putLong(uuid.getLeastSignificantBits());
-        return bb.array();
-    }
-
-    private UUID bytesToUUID(byte[] bytes) {
-        if (bytes == null || bytes.length < 16) {
-            return null;
-        }
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        long firstLong = bb.getLong();
-        long secondLong = bb.getLong();
-        return new UUID(firstLong, secondLong);
-    }
-
-    private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
+    @Override
+    public Order map(ResultSet rs) throws SQLException {
         byte[] orderIdBytes = rs.getBytes("order_id");
-        UUID orderId = bytesToUUID(orderIdBytes);
+        UUID orderId = DaoUtil.bytesToUUID(orderIdBytes);
         byte[] userIdBytes = rs.getBytes("user_id");
-        UUID userId = bytesToUUID(userIdBytes);
+        UUID userId = DaoUtil.bytesToUUID(userIdBytes);
         String status = rs.getString("status");
         Timestamp timestamp = rs.getTimestamp("created_at");
         LocalDateTime createdAt = timestamp != null ? timestamp.toLocalDateTime() : null;
@@ -68,9 +52,9 @@ public class OrderDAOImpl implements OrderDAO {
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(INSERT_ORDER_SQL)) {
-            byte[] orderIdBytes = uuidToBytes(order.getOrderId());
+            byte[] orderIdBytes = DaoUtil.uuidToBytes(order.getOrderId());
             stmt.setBytes(1, orderIdBytes);
-            byte[] userIdBytes = uuidToBytes(order.getUserId());
+            byte[] userIdBytes = DaoUtil.uuidToBytes(order.getUserId());
             stmt.setBytes(2, userIdBytes);
 
             stmt.executeUpdate();
@@ -84,11 +68,11 @@ public class OrderDAOImpl implements OrderDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(SELECT_BY_ORDER_ID_SQL)) {
 
-            stmt.setBytes(1, uuidToBytes(orderId));
+            stmt.setBytes(1, DaoUtil.uuidToBytes(orderId));
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    Order order = mapResultSetToOrder(rs);
+                    Order order = map(rs);
                     order.setOrderItems(orderItemDAO.findByOrderId(orderId));
                     return Optional.of(order);
                 }
@@ -104,11 +88,11 @@ public class OrderDAOImpl implements OrderDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(SELECT_BY_USER_ID_SQL)) {
 
-            stmt.setBytes(1, uuidToBytes(userId));
+            stmt.setBytes(1, DaoUtil.uuidToBytes(userId));
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                Order order = mapResultSetToOrder(rs);
+                Order order = map(rs);
                 order.setOrderItems(orderItemDAO.findByOrderId(order.getOrderId()));
                 orders.add(order);
             }
@@ -131,7 +115,7 @@ public class OrderDAOImpl implements OrderDAO {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                Order order = mapResultSetToOrder(rs);
+                Order order = map(rs);
                 order.setOrderItems(orderItemDAO.findByOrderId(order.getOrderId()));
                 orders.add(order);
             }
@@ -150,7 +134,7 @@ public class OrderDAOImpl implements OrderDAO {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                Order order = mapResultSetToOrder(rs);
+                Order order = map(rs);
                 order.setOrderItems(orderItemDAO.findByOrderId(order.getOrderId()));
                 orders.add(order);
             }
@@ -165,7 +149,7 @@ public class OrderDAOImpl implements OrderDAO {
              PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
 
             stmt.setString(1, order.getStatus());
-            stmt.setBytes(2, uuidToBytes(order.getOrderId()));
+            stmt.setBytes(2, DaoUtil.uuidToBytes(order.getOrderId()));
             stmt.executeUpdate();
         }
 
@@ -177,7 +161,7 @@ public class OrderDAOImpl implements OrderDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
 
-            stmt.setBytes(1, uuidToBytes(orderId));
+            stmt.setBytes(1, DaoUtil.uuidToBytes(orderId));
             stmt.executeUpdate();
         }
     }
