@@ -1,8 +1,9 @@
 package main.java.model;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class Product {
+public class Product implements Serializable {
 
     private UUID productId;
     private String name;
