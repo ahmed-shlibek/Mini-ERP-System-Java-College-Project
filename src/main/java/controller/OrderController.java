@@ -23,14 +23,11 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // -------------------------------------------------------------------
-    // --- Data Retrieval Methods (for UI Tables) ---
-    // -------------------------------------------------------------------
 
-    /**
-     * يجلب قائمة بالمنتجات المتاحة للعرض في لوحة الطلبات.
-     * تم تعديل نوع الإرجاع إلى List<Product> لتجنب تعقيد ProductStub في هذه الطبقة.
-     */
+    // --- Data Retrieval Methods (for UI Tables) ---
+
+
+
     public List<Product> getAvailableProducts() {
         try {
             // من الأفضل أن تكون هناك دالة findAllProducts في OrderService
@@ -43,9 +40,7 @@ public class OrderController {
         }
     }
 
-    /**
-     * يجلب جميع الطلبات لعرض سجل الطلبات.
-     */
+
     public List<Order> getAllOrders() {
         try {
             OrderDAO orderDAO = orderService.getOrderDAO();
@@ -56,17 +51,9 @@ public class OrderController {
         }
     }
 
-    // -------------------------------------------------------------------
     // --- POS Action Methods ---
-    // -------------------------------------------------------------------
 
-    /**
-     * إنشاء طلب جديد (POS).
-     * @param userId ID المستخدم الذي يقوم بإجراء الطلب.
-     * @param cartItems قائمة عناصر الطلب.
-     * @return ID الطلب المكتمل.
-     * @throws IllegalArgumentException لأخطاء منطق العمل (مثل نقص المخزون).
-     */
+
     public UUID placeNewOrder(UUID userId, List<OrderItem> cartItems) {
         try {
             // تفويض العملية لطبقة الخدمة التي تدير المعاملات (Transaction)
@@ -81,9 +68,7 @@ public class OrderController {
         }
     }
 
-    /**
-     * البحث عن طلب محدد بواسطة المعرف.
-     */
+
     public Optional<Order> findOrderById(UUID orderId) {
         return orderService.findOrderById(orderId);
     }

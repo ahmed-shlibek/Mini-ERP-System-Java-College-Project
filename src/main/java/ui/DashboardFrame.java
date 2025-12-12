@@ -10,10 +10,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-/**
- * لوحة التحكم الرئيسية.
- * تستخدم JTabbedPane للتنقل بين شاشات إدارة النظام.
- */
+// we Use tapped pane to move from different sections
 public class DashboardFrame extends JFrame {
 
     private final InventoryController inventoryController;

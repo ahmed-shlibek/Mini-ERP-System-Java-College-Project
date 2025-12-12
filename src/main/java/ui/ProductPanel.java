@@ -14,9 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * لوحة خاصة لعرض وإدارة المنتجات (Add/Update Stock).
- */
+//product panel to show products,update,delete and add
+
 public class ProductPanel extends JPanel {
 
     private final InventoryController inventoryController;
@@ -59,9 +58,7 @@ public class ProductPanel extends JPanel {
         loadProducts();
     }
 
-    /**
-     * جلب الأصناف من Controller وتخزينها في خريطة (Map) للعرض.
-     */
+//get categories from controller then put inside the map
     private void loadCategories() {
         try {
             List<Category> categories = categoryController.getAllCategories(); // استخدام CategoryController
@@ -88,9 +85,7 @@ public class ProductPanel extends JPanel {
         productTable = new JTable(tableModel);
     }
 
-    /**
-     * جلب المنتجات من Controller وتحميلها في الجدول.
-     */
+    //get products from controller then putting them in the list
     private void loadProducts() {
         // مسح البيانات القديمة
         tableModel.setRowCount(0);
@@ -118,9 +113,8 @@ public class ProductPanel extends JPanel {
         }
     }
 
-    /**
-     * إنشاء لوحة الأزرار (إضافة منتج، تحديث مخزون، إضافة صنف، تحديث القائمة).
-     */
+
+    //button panel
     private JPanel createControlPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
@@ -161,9 +155,7 @@ public class ProductPanel extends JPanel {
 
     // ------------------ واجهات إدارة البيانات (Dialogs) ------------------
 
-    /**
-     * فتح نافذة لإضافة صنف جديد. (الحل للمشكلة)
-     */
+
     private void showAddCategoryDialog() {
         String categoryName = JOptionPane.showInputDialog(this,
                 "Enter new Category name",
@@ -192,9 +184,7 @@ public class ProductPanel extends JPanel {
         }
     }
 
-    /**
-     * فتح نافذة لإضافة منتج جديد. (تم التنفيذ الآن)
-     */
+
     private void showAddProductDialog() {
         // حقول الإدخال
         JTextField nameField = new JTextField(10);
@@ -273,9 +263,7 @@ public class ProductPanel extends JPanel {
         }
     }
 
-    /**
-     * فتح نافذة لتحديث كمية المخزون لمنتج موجود.
-     */
+
     private void showUpdateStockDialog() {
 
         int selectedRow = productTable.getSelectedRow();

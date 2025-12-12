@@ -10,10 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * متحكم المنتجات (Controller Layer).
- * يربط بين واجهة المستخدم (UI) ومنطق الأعمال (ProductService).
- */
+//the controller layer يربط between the UI and the Product service
 public class InventoryController {
 
     private final InventoryService inventoryService;
@@ -26,33 +23,25 @@ public class InventoryController {
 
     // ------------------ عمليات العرض ------------------
 
-    /**
-     * جلب قائمة جميع المنتجات.
-     */
+    //list to get all products
     public List<Product> getAllProducts() {
         return inventoryService.getAllProducts(); // نفترض وجود هذه الدالة في الخدمة
     }
 
-    /**
-     * جلب قائمة جميع الأصناف لعرضها في قائمة منسدلة.
-     */
+
     public List<Category> getAllCategories() {
         return categoryService.getAllCategories(); // نفترض وجود هذه الدالة في الخدمة
     }
 
     // ------------------ عمليات الإدارة (للأدمين) ------------------
 
-    /**
-     * إنشاء منتج جديد.
-     */
+
     public Product createProduct(String name, long price, int stockQuantity, UUID categoryId) throws Exception {
         // يتم التحقق من الصلاحيات والتفاصيل داخل Service
         return inventoryService.createProduct(new Product(name, categoryId, price, stockQuantity));
     }
 
-    /**
-     * تحديث كمية المخزون لمنتج معين.
-     */
+
     public Product updateProductDetails(
             UUID productId,
             Long newPriceInCents,
@@ -119,5 +108,4 @@ public class InventoryController {
         inventoryService.deleteProduct(productId);
     }
 
-    // يمكن إضافة دالات أخرى مثل updateProductDetails, deleteProduct...
 }

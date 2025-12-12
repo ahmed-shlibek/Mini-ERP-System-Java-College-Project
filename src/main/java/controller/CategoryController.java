@@ -5,10 +5,7 @@ import main.java.service.CategoryService;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * متحكم الأصناف (Controller Layer).
- * يربط بين الواجهة ومنطق الأعمال لإدارة الأصناف.
- */
+
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -17,16 +14,12 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    /**
-     * جلب قائمة جميع الأصناف.
-     */
+    //List to get all categories
     public List<Category> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
-    /**
-     * إنشاء صنف جديد بالاسم المحدد.
-     */
+
     public Category createCategory(String name) throws Exception {
         // نفترض وجود دالة createCategory في CategoryService
         return categoryService.createCategory(new Category(name));

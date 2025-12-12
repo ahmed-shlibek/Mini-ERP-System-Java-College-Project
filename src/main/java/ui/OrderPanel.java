@@ -324,9 +324,7 @@ public class OrderPanel extends JPanel {
         }
     }
 
-    /**
-     * تحميل بيانات المنتجات المتاحة وتحديث متغير الكلاس.
-     */
+
     private void loadProductData() {
         productTableModel.setRowCount(0);
         // تم تصحيح الخطأ: يتم التخزين في متغير الكلاس availableProducts
@@ -343,9 +341,8 @@ public class OrderPanel extends JPanel {
         }
     }
 
-    /**
-     * تحميل سجل الطلبات وتحديث الجدول.
-     */
+
+
     private void loadOrderHistory(){
         // تم تصحيح الخطأ: مسح الصفوف بدلاً من الأعمدة
         historyTableModel.setRowCount(0);
@@ -364,9 +361,7 @@ public class OrderPanel extends JPanel {
         }
     }
 
-    /**
-     * تحديث جدول عربة التسوق وحساب المجموع الكلي.
-     */
+
     private void updateCartTable() {
         cartTableModel.setRowCount(0); // مسح جميع الصفوف
 

@@ -14,9 +14,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    /**
-     * إنشاء مستخدم جديد.
-     */
+
     public User createUser(String username, String password, String role) {
         User newUser = new User(username, password, role);
         return userService.createUser(newUser);
@@ -26,9 +24,7 @@ public class UserController {
         return userService.updateUser(user);
     }
 
-    /**
-     * حذف مستخدم عن طريق المعرف.
-     */
+
     public void deleteUser(UUID userId) {
         userService.deleteUser(userId);
     }

@@ -10,10 +10,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/**
- * شاشة تسجيل الدخول (View Layer).
- * تتعامل فقط مع عرض المكونات واستقبال الإدخال وإرساله إلى Controller.
- */
+
 public class LoginFrame extends JFrame {
 
     private final AuthController authController;
