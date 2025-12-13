@@ -262,9 +262,14 @@ public class OrderPanel extends JPanel {
         JButton viewDetailsButton = new JButton("View Details");
         viewDetailsButton.addActionListener(this::viewDetailsAction);
 
+
+        JButton printButton = new JButton("Print Receipt");
+        printButton.addActionListener(this::printOrderAction);
+
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         controlPanel.add(refreshButton);
         controlPanel.add(viewDetailsButton);
+        controlPanel.add(printButton);
 
         historyPanel.add(new JScrollPane(historyTable), BorderLayout.CENTER);
         historyPanel.add(controlPanel, BorderLayout.SOUTH);
@@ -384,6 +389,41 @@ public class OrderPanel extends JPanel {
 
         // تحديث إجمالي الفاتورة
         totalLabel.setText("Total: " + CURRENCY_FORMAT.format(grandTotalCents / 100.0));
+    }
+
+
+    // ✅ دالة التعامل مع حدث الطباعة
+    private void printOrderAction(ActionEvent e) {
+        int selectedRow = historyTable.getSelectedRow();
+        if(selectedRow == -1){
+            JOptionPane.showMessageDialog(this,
+                    "Please select an Order to print.",
+                    "Selection Error",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String orderIdShort = (String) historyTableModel.getValueAt(selectedRow,0);
+
+        // البحث عن الطلب الكامل باستخدام المعرف المختصر (نفس منطق viewDetails)
+        Optional<Order> selectedOrderOpt = orderController.getAllOrders().stream()
+                .filter(o -> o.getOrderId().toString().substring(0, 8).equals(orderIdShort))
+                .findFirst();
+
+        if (selectedOrderOpt.isPresent()) {
+            UUID orderId = selectedOrderOpt.get().getOrderId();
+
+            // استدعاء الكونترولر للطباعة
+            try {
+                orderController.printOrderReceipt(orderId);
+                JOptionPane.showMessageDialog(this,
+                        "Receipt printing started in background...",
+                        "Printing", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to print: " + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
 }
